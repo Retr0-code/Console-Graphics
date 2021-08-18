@@ -129,74 +129,145 @@ int Graphics::calculatePosition(std::string list[], int size)
 	return lengthMAX;
 }
 
-// Creates frame around description
-void Graphics::makeFrame(int startX, int startY, int Width, int Height)
+
+// Constructs frame with custom segments
+Frame::Frame(int _originX, int _originY, int _Width, int _Height, frameSegments _segments)
 {
-	setCursor(startX, startY);
+	segments.leftTopCorner = _segments.leftTopCorner;
+	segments.horizontal = _segments.horizontal;
+	segments.vertical = _segments.vertical;
 
+	originX = _originX;
+	originY = _originY;
 
-	std::cout << (char)201;
-	for (int i = 0; i < Width - 1; i++)
+	Width = _Width;
+	Height = _Height;
+
+	if (_segments.rightTopCorner == NULL)
 	{
-		std::cout << (char)205;
+		segments.rightTopCorner = _segments.leftTopCorner;
+
+		if (_segments.leftDownCorner == NULL)
+		{
+			segments.leftDownCorner = _segments.leftTopCorner;
+
+			if (_segments.rightDownCorner == NULL)
+				segments.rightDownCorner = _segments.leftTopCorner;
+			else
+				segments.rightDownCorner = _segments.rightDownCorner;
+		}
+		else
+			segments.leftDownCorner = _segments.leftDownCorner;
 	}
-	std::cout << (char)187;
+	else
+		segments.rightTopCorner = _segments.rightTopCorner;
+}
+
+// Constructs frame with default segments
+Frame::Frame(int _originX, int _originY, int _Width, int _Height)
+{
+	originX = _originX;
+	originY = _originY;
+
+	Width = _Width;
+	Height = _Height;
+}
+
+
+// Creates frame around description
+void Frame::spawnFrame()
+{
+	setCursor(originX, originY);
+
+
+	std::cout << segments.leftTopCorner;
+	for (int i = 0; i < Width; i++)
+	{
+		std::cout << segments.horizontal;
+	}
+	std::cout << segments.rightTopCorner;
 	std::cout << std::endl;
 
 
 	for (int i = 1; i < Height; i++)
 	{
-		setCursor(startX, startY + i);
-		for (int j = 0; j < Width; j++)
+		setCursor(originX, originY + i);
+		for (int j = 0; j <= Width; j++)
 		{
-			if (j == 0 || j == Width - 1)
+			if (j == 0 || j == Width)
 			{
-				std::cout << (char)186;
+				std::cout << segments.vertical;
 			}
 			std::cout << " ";
 		}
 		std::cout << std::endl;
 	}
 
-	setCursor(startX, startY + Height);
-	std::cout << (char)200;
-	for (int i = 0; i < Width - 1; i++)
+	setCursor(originX, originY + Height);
+	std::cout << segments.leftDownCorner;
+
+	for (int i = 0; i < Width; i++)
 	{
-		std::cout << (char)205;
+		std::cout << segments.horizontal;
 	}
-	std::cout << (char)188;
+	std::cout << segments.rightDownCorner;
 }
 
 
 
 // Fixed menu position of paragraphs without custom colors
-Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics)
+Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 {
 	X = _X;
 	Y = _Y;
 	fontSize = _Graphics.fontSize;
 	size = _size;
+	descriptionField = _descriptionField;
 
 	for (int i = 0; i < _size; i++)
 		menuObject[i] = _menuObject[i];
 }
 
 // Centered menu position of paragraphs without custom colors
-Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics)
+Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 {
-	std::string objNames[4] = { _menuObject[0]->paragraphName, _menuObject[1]->paragraphName, _menuObject[2]->paragraphName, _menuObject[3]->paragraphName };
+	std::string* objNames = new std::string[_size];
+	
+	for (int i = 0; i < _size; i++)
+	{
+		menuObject[i] = _menuObject[i];
+		objNames[i] = _menuObject[0]->paragraphName;
+	}
 
 	X = _Graphics.windowWidth / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
 	Y = _Graphics.windowHeight / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
 	fontSize = _Graphics.fontSize;
 
 	size = _size;
-
-	for (int i = 0; i < _size; i++)
-		menuObject[i] = _menuObject[i];
+	descriptionField = _descriptionField;
 
 	SecureZeroMemory(objNames, _size);
 }
+
+// Creates Menu with fixed position in frame without custom colors
+Menu::Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
+{
+	std::string* objNames = new std::string[_size];
+
+	for (int i = 0; i < _size; i++)
+	{
+		menuObject[i] = _menuObject[i];
+		objNames[i] = _menuObject[0]->paragraphName;
+	}
+
+	X = _Frame.Width / 4 + 1;
+	Y = _Frame.Height / 2;
+
+	fontSize = _Graphics.fontSize;
+	size = _size;
+	descriptionField = _descriptionField;
+}
+
 
 // Spawns Vertical Menu
 void Menu::vertical()
@@ -207,7 +278,7 @@ void Menu::vertical()
 	int * ColorSet = new int[size];
 	for (int i = 0; i < size; i++)
 	{
-		ColorSet[i] = defaultColors;
+		ColorSet[i] = Graphics::defaultColors;
 	}
 
 	while (true)
@@ -264,7 +335,7 @@ void Menu::vertical()
 // Displays description of functions that is in menu
 void Menu::DrawDescription(std::string text)
 {
-	setCursor(10, 5);
+	setCursor(descriptionField.originX + 3, descriptionField.originY + 3);
 
 	std::cout << text;
 }
