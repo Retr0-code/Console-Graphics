@@ -144,8 +144,9 @@ void Graphics::makeFrame(int startX, int startY, int Width, int Height)
 	std::cout << std::endl;
 
 
-	for (int i = 0; i < Height; i++)
+	for (int i = 1; i < Height; i++)
 	{
+		setCursor(startX, startY + i);
 		for (int j = 0; j < Width; j++)
 		{
 			if (j == 0 || j == Width - 1)
@@ -156,9 +157,9 @@ void Graphics::makeFrame(int startX, int startY, int Width, int Height)
 		}
 		std::cout << std::endl;
 	}
+
+	setCursor(startX, startY + Height);
 	std::cout << (char)200;
-
-
 	for (int i = 0; i < Width - 1; i++)
 	{
 		std::cout << (char)205;
