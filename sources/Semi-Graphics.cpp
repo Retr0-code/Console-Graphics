@@ -275,6 +275,11 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics
 	secondaryColors = _Graphics.secondaryColors;
 }
 
+Menu::~Menu()
+{
+	delete menuObject;
+	setColor(defaultColors, fontSize);
+}
 
 // Spawns Vertical Menu
 void Menu::vertical()
@@ -315,6 +320,7 @@ void Menu::vertical()
 			{
 				if (counter)
 				{
+					setColor(defaultColors, fontSize);
 					menuObject[counter - 1]->Execute();
 					break;
 				}

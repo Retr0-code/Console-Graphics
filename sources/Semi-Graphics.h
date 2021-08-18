@@ -110,6 +110,8 @@ public:
 	// Creates Menu in frame without custom colors
 	Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField);
 
+	~Menu();
+
 	// Spawns Vertical Menu
 	void vertical();
 

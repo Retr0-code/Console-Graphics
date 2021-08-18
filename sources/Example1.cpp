@@ -93,7 +93,6 @@ public:
 	}
 };
 
-
 int main()
 {
 	Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, {BG_BLACK, FG_WHITE}, {BG_ORANGE, FG_BLACK}, FONT_SIZE);
