@@ -28,12 +28,9 @@ class Graphics
 protected:
 	int defaultColors = 7;
 	int secondaryColors = 31;
-	const static int fontSize = 48;
-	const int windowWidth = 1920;
-	const int windowHeight = 1080;
 
 	// Defines text color
-	void setColor(int color, int _fontSize = fontSize);
+	void setColor(int color, int _fontSize = 48);
 
 	// Moves cursor to coordinates (X, Y)
 	void setCursor(int x, int y);
@@ -44,6 +41,9 @@ protected:
 	Graphics() = default;
 
 public:
+	int fontSize = 48;
+	int windowWidth = 1920;
+	int windowHeight = 1080;
 
 	// Sets default window settings with custom colors and font size E.g. 1920, 1090, 7, 31, 48
 	Graphics(int resolutionX, int resolutionY, int _defaultColor, int _secondaryColor, int _fontSize)
@@ -69,11 +69,15 @@ public:
 	{
 		//MoveWindow(window_handle, x, y, width, height, redraw_window);
 		MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
-
+		windowWidth = resolutionX;
+		windowHeight = resolutionY;
 
 		// Checks does user supply font size
 		if (_fontSize != NULL)
-			setColor(defaultColors, _fontSize);
+		{
+			fontSize = _fontSize;
+			setColor(defaultColors, fontSize);
+		}
 		else
 			setColor(defaultColors);
 
@@ -91,14 +95,16 @@ class Menu : protected Graphics
 private:
 	int X, Y;
 	int size;
+	int fontSize;
 	PARAGRAPH** menuObject = new PARAGRAPH*[size];
 
 public:
 	// Fixed menu position of paragraphs without custom colors
-	Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[])
+	Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics)
 	{
 		X = _X;
 		Y = _Y;
+		fontSize = _Graphics.fontSize;
 		size = _size;
 
 		for (int i = 0; i < _size; i++)
@@ -106,12 +112,13 @@ public:
 	}
 
 	// Centered menu position of paragraphs without custom colors
-	Menu(int _size, PARAGRAPH* _menuObject[])
+	Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics)
 	{
 		std::string objNames[4] = { _menuObject[0]->paragraphName, _menuObject[1]->paragraphName, _menuObject[2]->paragraphName, _menuObject[3]->paragraphName };
 
-		X = windowWidth / fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
-		Y = windowHeight / fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
+		X = _Graphics.windowWidth / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
+		Y = _Graphics.windowHeight / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
+		fontSize = _Graphics.fontSize;
 
 		size = _size;
 

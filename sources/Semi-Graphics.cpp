@@ -146,7 +146,7 @@ void Menu::vertical()
 			for (int j = 0; j < size; j++)
 			{
 				setCursor(X, Y + j);
-				setColor(ColorSet[j]);
+				setColor(ColorSet[j], fontSize);
 				std::cout << menuObject[j]->paragraphName;
 			}
 
