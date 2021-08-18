@@ -46,6 +46,45 @@ int calculatePercent(int digit, int perc)
 	return (digit * perc) / 100;
 }
 
+// Sets default window settings with custom colors and font size E.g. 1920, 1090, 7, 31, 48
+Graphics::Graphics(int resolutionX, int resolutionY, int _defaultColor, int _secondaryColor, int _fontSize)
+{
+	defaultColors = _defaultColor;
+	secondaryColors = _secondaryColor;
+
+	//MoveWindow(window_handle, x, y, width, height, redraw_window);
+	MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
+
+
+	// Checks does user supply font size
+	if (_fontSize != NULL)
+		setColor(_defaultColor, _fontSize);
+	else
+		setColor(_defaultColor);
+
+	setCursor(0, 0);
+}
+
+// Sets default window settings without custom colors E.g. 1920, 1090, 48
+Graphics::Graphics(int resolutionX, int resolutionY, int _fontSize)
+{
+	//MoveWindow(window_handle, x, y, width, height, redraw_window);
+	MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
+	windowWidth = resolutionX;
+	windowHeight = resolutionY;
+
+	// Checks does user supply font size
+	if (_fontSize != NULL)
+	{
+		fontSize = _fontSize;
+		setColor(defaultColors, fontSize);
+	}
+	else
+		setColor(defaultColors);
+
+	setCursor(0, 0);
+}
+
 // Defines text color
 void Graphics::setColor(int color, int _fontSize)
 {

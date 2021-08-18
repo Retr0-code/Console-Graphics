@@ -46,43 +46,10 @@ public:
 	int windowHeight = 1080;
 
 	// Sets default window settings with custom colors and font size E.g. 1920, 1090, 7, 31, 48
-	Graphics(int resolutionX, int resolutionY, int _defaultColor, int _secondaryColor, int _fontSize)
-	{
-		defaultColors = _defaultColor;
-		secondaryColors = _secondaryColor;
-
-		//MoveWindow(window_handle, x, y, width, height, redraw_window);
-		MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
-
-
-		// Checks does user supply font size
-		if (_fontSize != NULL)
-			setColor(_defaultColor, _fontSize);
-		else
-			setColor(_defaultColor);
-
-		setCursor(0, 0);
-	}
+	Graphics(int resolutionX, int resolutionY, int _defaultColor, int _secondaryColor, int _fontSize);
 
 	// Sets default window settings without custom colors E.g. 1920, 1090, 48
-	Graphics(int resolutionX, int resolutionY, int _fontSize)
-	{
-		//MoveWindow(window_handle, x, y, width, height, redraw_window);
-		MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
-		windowWidth = resolutionX;
-		windowHeight = resolutionY;
-
-		// Checks does user supply font size
-		if (_fontSize != NULL)
-		{
-			fontSize = _fontSize;
-			setColor(defaultColors, fontSize);
-		}
-		else
-			setColor(defaultColors);
-
-		setCursor(0, 0);
-	}
+	Graphics(int resolutionX, int resolutionY, int _fontSize);
 
 	// Creates frame around description
 	void makeFrame(int startX, int startY, int Width, int Height);
