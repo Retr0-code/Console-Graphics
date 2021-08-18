@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-
+#include "colors.h"
 
 typedef struct
 {
@@ -12,7 +12,11 @@ typedef struct
 	char vertical;
 } frameSegments;
 
-
+typedef struct
+{
+	int frontground;
+	int background;
+} color;
 
 // Clears the screen
 void cls(HANDLE hConsole);
@@ -40,9 +44,6 @@ public:
 class Graphics
 {
 protected:
-	int defaultColors = 7;
-	int secondaryColors = 31;
-
 	// Defines text color
 	void setColor(int color, int _fontSize = 48);
 
@@ -58,9 +59,12 @@ public:
 	int fontSize = 48;
 	int windowWidth = 1920;
 	int windowHeight = 1080;
+	int defaultColors = BG_BLACK + FG_WHITE;
+	int secondaryColors = BG_BLUE + FG_BLACK;
+
 
 	// Sets default window settings with custom colors and font size E.g. 1920, 1090, 7, 31, 48
-	Graphics(int resolutionX, int resolutionY, int _defaultColor, int _secondaryColor, int _fontSize);
+	Graphics(int resolutionX, int resolutionY, color _defaultColor, color _secondaryColor, int _fontSize);
 
 	// Sets default window settings without custom colors E.g. 1920, 1090, 48
 	Graphics(int resolutionX, int resolutionY, int _fontSize);

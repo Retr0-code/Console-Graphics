@@ -47,10 +47,10 @@ int calculatePercent(int digit, int perc)
 }
 
 // Sets default window settings with custom colors and font size E.g. 1920, 1090, 7, 31, 48
-Graphics::Graphics(int resolutionX, int resolutionY, int _defaultColor, int _secondaryColor, int _fontSize)
+Graphics::Graphics(int resolutionX, int resolutionY, color _defaultColor, color _secondaryColor, int _fontSize)
 {
-	defaultColors = _defaultColor;
-	secondaryColors = _secondaryColor;
+	defaultColors = _defaultColor.background + _defaultColor.frontground;
+	secondaryColors = _secondaryColor.background + _secondaryColor.frontground;
 
 	//MoveWindow(window_handle, x, y, width, height, redraw_window);
 	MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
@@ -58,9 +58,9 @@ Graphics::Graphics(int resolutionX, int resolutionY, int _defaultColor, int _sec
 
 	// Checks does user supply font size
 	if (_fontSize != NULL)
-		setColor(_defaultColor, _fontSize);
+		setColor(defaultColors, _fontSize);
 	else
-		setColor(_defaultColor);
+		setColor(defaultColors);
 
 	setCursor(0, 0);
 }
@@ -223,6 +223,8 @@ Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphi
 	fontSize = _Graphics.fontSize;
 	size = _size;
 	descriptionField = _descriptionField;
+	defaultColors = _Graphics.defaultColors;
+	secondaryColors = _Graphics.secondaryColors;
 
 	for (int i = 0; i < _size; i++)
 		menuObject[i] = _menuObject[i];
@@ -242,6 +244,9 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descr
 	X = _Graphics.windowWidth / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
 	Y = _Graphics.windowHeight / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
 	fontSize = _Graphics.fontSize;
+
+	defaultColors = _Graphics.defaultColors;
+	secondaryColors = _Graphics.secondaryColors;
 
 	size = _size;
 	descriptionField = _descriptionField;
@@ -266,6 +271,8 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics
 	fontSize = _Graphics.fontSize;
 	size = _size;
 	descriptionField = _descriptionField;
+	defaultColors = _Graphics.defaultColors;
+	secondaryColors = _Graphics.secondaryColors;
 }
 
 

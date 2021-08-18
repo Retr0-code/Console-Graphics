@@ -93,11 +93,25 @@ public:
 	}
 };
 
+void setColor(int color, int _fontSize = 12)
+{
+	CONSOLE_FONT_INFOEX cfi;
+	cfi.cbSize = sizeof(cfi);
+	cfi.nFont = 0;
+	cfi.dwFontSize.X = 0;
+	cfi.dwFontSize.Y = _fontSize;
+	cfi.FontFamily = FF_DONTCARE;
+	cfi.FontWeight = FW_NORMAL;
 
+	wcscpy_s(cfi.FaceName, L"Consolas");
+	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
+
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+}
 int main()
 {
 	/*
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i <= 256; i++)
 	{
 		setColor(i);
 		std::cout << "Color - " << i << std::endl;
@@ -108,7 +122,8 @@ int main()
 		std::cout << i << " " << (char)i << std::endl;
 	}*/
 
-	Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE);
+	
+	Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, {BG_BLACK, FG_WHITE}, {BG_ORANGE, FG_BLACK}, FONT_SIZE);
 
 	//window.makeFrame(0, 0, WINDOW_WIDTH / 10 - calculatePercent((WINDOW_WIDTH / 10), 11), WINDOW_HEIGHT / 10 - calculatePercent(WINDOW_HEIGHT / 10, 80) );
 	Frame frame(0, 0, (WINDOW_WIDTH / FONT_SIZE) * 2, WINDOW_HEIGHT / (FONT_SIZE * 2));
@@ -138,7 +153,7 @@ int main()
 	delete fstPar, sndPar, trdPar, frtPar, objects;
 	SecureZeroMemory(menuNames, 4);
 	SecureZeroMemory(menuDescriptions, 4);
-
+	
 	system("pause");
 
 	return 0;
