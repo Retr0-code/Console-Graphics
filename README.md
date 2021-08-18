@@ -5,5 +5,7 @@ This library was created to speed up the process of programming windows applicat
   * Basic vertical menu ✔️
   * Basic horizontal menu ❌
   * Dialog box ❌
-  * User advanced customization ⭕
+  * User advanced customization ✔️
   * Check boxes ❌
+  * Tables ❌
+  * Text redactor ❌
