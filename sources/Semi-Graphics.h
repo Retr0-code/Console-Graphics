@@ -67,37 +67,16 @@ private:
 
 public:
 	// Fixed menu position of paragraphs without custom colors
-	Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics)
-	{
-		X = _X;
-		Y = _Y;
-		fontSize = _Graphics.fontSize;
-		size = _size;
-
-		for (int i = 0; i < _size; i++)
-			menuObject[i] = _menuObject[i];
-	}
+	Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics);
 
 	// Centered menu position of paragraphs without custom colors
-	Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics)
-	{
-		std::string objNames[4] = { _menuObject[0]->paragraphName, _menuObject[1]->paragraphName, _menuObject[2]->paragraphName, _menuObject[3]->paragraphName };
+	Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics);
 
-		X = _Graphics.windowWidth / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
-		Y = _Graphics.windowHeight / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
-		fontSize = _Graphics.fontSize;
-
-		size = _size;
-
-		for (int i = 0; i < _size; i++)
-			menuObject[i] = _menuObject[i];
-
-		SecureZeroMemory(objNames, _size);
-	}
-
-
+	// Spawns Vertical Menu
 	void vertical();
 
 private:
+
+	// Displays description of functions that is in menu
 	void DrawDescription(std::string text);
 };
