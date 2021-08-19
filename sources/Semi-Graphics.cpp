@@ -250,7 +250,7 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descr
 	}
 
 	X = _Graphics.windowWidth / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
-	Y = _Graphics.windowHeight / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
+	Y = _Graphics.windowHeight / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames)) + 2;
 	fontSize = _Graphics.fontSize;
 
 	defaultColors = _Graphics.defaultColors;
