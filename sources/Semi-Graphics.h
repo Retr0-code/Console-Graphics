@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "colors.h"
 
+
 typedef struct
 {
 	char leftTopCorner;
@@ -17,6 +18,17 @@ typedef struct
 	int frontground;
 	int background;
 } color;
+
+typedef struct
+{
+	int selectColor;
+	int deselectColor;
+	int backgroundColor;
+} MSG_BOX_TYPE;
+
+#define BOX_INFO { BG_WHITE + FG_BLACK, BG_BLACK + FG_WHITE, BG_AZURE + FG_WHITE }
+#define BOX_ERROR { BG_WHITE + FG_BLACK, BG_BLACK + FG_WHITE, BG_RED + FG_BLACK }
+#define BOX_WARNING { BG_WHITE + FG_BLACK, BG_BLACK + FG_WHITE, BG_ORANGE + FG_BLACK }
 
 // Clears the screen
 void cls(HANDLE hConsole);
@@ -40,7 +52,7 @@ public:
 	virtual void Execute() = 0;
 };
 
-
+// Main parent class
 class Graphics
 {
 protected:
@@ -75,6 +87,7 @@ public:
 class Frame : protected Graphics
 {
 public:
+	Frame() = default;
 	frameSegments segments = { (char)201, (char)187, (char)200, (char)188, (char)205, (char)186 };
 	int originX = 0;
 	int originY = 0;
@@ -82,7 +95,6 @@ public:
 	int Height;
 
 
-	Frame() = default;
 	Frame(int _originX, int _originY, int _Width, int _Height, frameSegments _segments);
 	Frame(int _originX, int _originY, int _Width, int _Height);
 	
@@ -117,6 +129,29 @@ public:
 
 private:
 
+	Menu() = default;
+
 	// Displays description of functions that is in menu
 	void DrawDescription(std::string text);
+};
+
+// Dialog box
+class MsgBox : protected Graphics
+{
+protected:
+	std::string description;
+	int lfontSize;
+	int width;
+	int height;
+
+public:
+	MsgBox(std::string _description, Graphics _Graphics)
+	{
+		description = _description;
+		lfontSize = _Graphics.fontSize;
+		width = _Graphics.windowWidth;
+		height = _Graphics.windowHeight;
+	}
+
+	BOOL Message(MSG_BOX_TYPE container);
 };

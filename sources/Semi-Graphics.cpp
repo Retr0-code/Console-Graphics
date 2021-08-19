@@ -52,26 +52,6 @@ Graphics::Graphics(int resolutionX, int resolutionY, color _defaultColor, color 
 	defaultColors = _defaultColor.background + _defaultColor.frontground;
 	secondaryColors = _secondaryColor.background + _secondaryColor.frontground;
 
-	//MoveWindow(window_handle, x, y, width, height, redraw_window);
-	MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
-
-
-	// Checks does user supply font size
-	if (_fontSize != NULL)
-		setColor(defaultColors, _fontSize);
-	else
-		setColor(defaultColors);
-
-	setCursor(0, 0);
-}
-
-// Sets default window settings without custom colors E.g. 1920, 1090, 48
-Graphics::Graphics(int resolutionX, int resolutionY, int _fontSize)
-{
-	//MoveWindow(window_handle, x, y, width, height, redraw_window);
-	MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
-	windowWidth = resolutionX;
-	windowHeight = resolutionY;
 
 	// Checks does user supply font size
 	if (_fontSize != NULL)
@@ -81,6 +61,33 @@ Graphics::Graphics(int resolutionX, int resolutionY, int _fontSize)
 	}
 	else
 		setColor(defaultColors);
+
+	//MoveWindow(window_handle, x, y, width, height, redraw_window);
+	MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
+	windowWidth = resolutionX;
+	windowHeight = resolutionY;
+
+
+	setCursor(0, 0);
+}
+
+// Sets default window settings without custom colors E.g. 1920, 1090, 48
+Graphics::Graphics(int resolutionX, int resolutionY, int _fontSize)
+{
+
+	// Checks does user supply font size
+	if (_fontSize != NULL)
+	{
+		fontSize = _fontSize;
+		setColor(defaultColors, fontSize);
+	}
+	else
+		setColor(defaultColors);
+	
+	//MoveWindow(window_handle, x, y, width, height, redraw_window);
+	MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
+	windowWidth = resolutionX;
+	windowHeight = resolutionY;
 
 	setCursor(0, 0);
 }
@@ -198,7 +205,8 @@ void Frame::spawnFrame()
 			{
 				std::cout << segments.vertical;
 			}
-			std::cout << " ";
+			if (j != Width)
+				std::cout << " ";
 		}
 		std::cout << std::endl;
 	}
@@ -281,6 +289,7 @@ Menu::~Menu()
 	setColor(defaultColors, fontSize);
 }
 
+
 // Spawns Vertical Menu
 void Menu::vertical()
 {
@@ -288,6 +297,8 @@ void Menu::vertical()
 	char key;
 
 	int * ColorSet = new int[size];
+	SecureZeroMemory(ColorSet, size);
+
 	for (int i = 0; i < size; i++)
 	{
 		ColorSet[i] = Graphics::defaultColors;
@@ -351,4 +362,76 @@ void Menu::DrawDescription(std::string text)
 	setCursor(descriptionField.originX + 3, descriptionField.originY + 3);
 
 	std::cout << text;
+}
+
+
+// Spawns Dialog box of type that user wants
+BOOL MsgBox::Message(MSG_BOX_TYPE container)
+{
+	int originX = (width / 4) / lfontSize + 2;
+	int originY = ((height / 4) / lfontSize) * 3;
+
+
+	setColor(container.backgroundColor, lfontSize);
+	Frame frame((width / 4) / lfontSize, (height / 4) / lfontSize, (width / lfontSize) * 2 - (width / 4) / lfontSize * 2, height / (lfontSize * 2));
+	frame.spawnFrame();
+
+	setCursor(frame.originX + 3, frame.originY + 3);
+	BOOL state = FALSE;
+	char key;
+
+	int ColorSet[2];
+
+	SecureZeroMemory(ColorSet, 2);
+
+	for (int i = 0; i < 2; i++)
+	{
+		ColorSet[i] = container.deselectColor;
+	}
+
+	while (true)
+	{
+		try
+		{
+			setColor(container.backgroundColor, lfontSize);
+			setCursor(frame.originX + 3, frame.originY + 3);
+			std::cout << description;
+
+			setCursor(originX * 2, originY);
+			setColor(ColorSet[state], lfontSize);
+			std::cout << "  OK  ";
+
+
+			setCursor(originX * 4, originY);
+			setColor(ColorSet[state - 1], lfontSize);
+			std::cout << "CANCEL";
+
+			key = _getch();
+
+			if (key == 77 && state == TRUE)
+			{
+				ColorSet[state] = container.selectColor;
+				ColorSet[state - 1] = container.deselectColor;
+				state = FALSE;
+			}
+			else if (key == 75 && state == FALSE)
+			{
+				ColorSet[state] = container.deselectColor;
+				ColorSet[state - 1] = container.selectColor;
+				state = TRUE;
+			}
+
+			else if (key == '\r')
+			{
+
+				setColor(defaultColors, lfontSize);
+				return state;
+			}
+		}
+		catch (...)
+		{
+			state = FALSE;
+			continue;
+		}
+	}
 }
