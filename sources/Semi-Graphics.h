@@ -113,19 +113,22 @@ private:
 	Frame descriptionField;
 
 public:
-	// Fixed menu position of paragraphs without custom colors
+	// Fixed menu position of paragraphs 
 	Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField);
 
-	// Centered menu position of paragraphs without custom colors
+	// Centered vertical menu with centered position of paragraphs
 	Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField);
 
-	// Creates Menu in frame without custom colors
+	// Creates menu with centered position in frame
 	Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField);
 
 	~Menu();
 
-	// Spawns Vertical Menu
+	// Spawns vertical menu
 	void vertical();
+
+	// Spawns horizontal menu
+	void horizontal();
 
 private:
 

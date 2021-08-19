@@ -223,7 +223,7 @@ void Frame::spawnFrame()
 
 
 
-// Fixed menu position of paragraphs without custom colors
+// Fixed menu position of paragraphs without
 Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 {
 	X = _X;
@@ -238,7 +238,7 @@ Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphi
 		menuObject[i] = _menuObject[i];
 }
 
-// Centered menu position of paragraphs without custom colors
+// Centered vertical menu with centered position of paragraphs
 Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 {
 	std::string* objNames = new std::string[_size];
@@ -250,7 +250,7 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descr
 	}
 
 	X = _Graphics.windowWidth / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
-	Y = _Graphics.windowHeight / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames)) + 2;
+	Y = _Graphics.windowHeight / _Graphics.fontSize - calculatePosition(objNames, sizeof(objNames) / sizeof(*objNames)) - 3;
 	fontSize = _Graphics.fontSize;
 
 	defaultColors = _Graphics.defaultColors;
@@ -262,7 +262,8 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descr
 	SecureZeroMemory(objNames, _size);
 }
 
-// Creates Menu with fixed position in frame without custom colors
+
+// Creates menu with centered position in frame
 Menu::Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
 {
 	std::string* objNames = new std::string[_size];
@@ -323,6 +324,83 @@ void Menu::vertical()
 				counter--;
 			}
 			else if (key == 80 && (counter >= 0 && counter < size))
+			{
+				counter++;
+			}
+
+			else if (key == '\r')
+			{
+				if (counter)
+				{
+					setColor(defaultColors, fontSize);
+					menuObject[counter - 1]->Execute();
+					break;
+				}
+			}
+
+			for (int i = 0; i < size; i++)
+			{
+				ColorSet[i] = defaultColors;
+			}
+
+			if (counter)
+			{
+				ColorSet[counter - 1] = secondaryColors;
+			}
+			DrawDescription(menuObject[counter - 1]->description);
+		}
+		catch (...)
+		{
+			counter = 1;
+			continue;
+		}
+	}
+}
+
+// Spawns horizontal menu
+void Menu::horizontal()
+{
+	int counter = 1;
+	char key;
+
+	int * ColorSet = new int[size];
+	SecureZeroMemory(ColorSet, size);
+
+	if (size % 2 != 0)
+	{
+		X = X / size * 2;
+		Y = Y - size / 6;
+	}
+	else
+	{
+		X = X / (size / 2) - 2;
+		Y = Y - size / 6;
+	}
+
+	for (int i = 0; i < size; i++)
+	{
+		ColorSet[i] = Graphics::defaultColors;
+	}
+
+	while (true)
+	{
+		try
+		{
+			for (int j = 0; j < size; j++)
+			{
+				setCursor(X + X * j, Y);
+				setColor(ColorSet[j], fontSize);
+				std::cout << menuObject[j]->paragraphName;
+			}
+
+			key = _getch();
+
+
+			if (key == 75 && (counter > 1 && counter <= size))
+			{
+				counter--;
+			}
+			else if (key == 77 && (counter >= 0 && counter < size))
 			{
 				counter++;
 			}
