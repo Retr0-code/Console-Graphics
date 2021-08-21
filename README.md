@@ -9,7 +9,6 @@ This library was created to speed up the process of programming windows applicat
   * Swithing between multiple menus ❌
   * Check boxes ✔️
   * Tables ❌
-  * Text redactor ❌
 
 ## Getting started
 If You want to use this library you **should** use precompiled headers option, but it is not necessary.
