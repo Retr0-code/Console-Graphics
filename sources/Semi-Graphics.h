@@ -130,6 +130,8 @@ public:
 	// Spawns horizontal menu
 	void horizontal();
 
+	PARAGRAPH** checkBox();
+
 private:
 
 	Menu() = default;

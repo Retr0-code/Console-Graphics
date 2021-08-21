@@ -434,9 +434,103 @@ void Menu::horizontal()
 	}
 }
 
+// Spawns checkbox menu where you can choose multiple points (returns selected paragraphs)
+PARAGRAPH** Menu::checkBox()
+{
+	int counter = 1;
+	char key;
+
+	PARAGRAPH** selectedPoints = new PARAGRAPH*[size];
+	SecureZeroMemory(selectedPoints, size);
+
+	int * ColorSet = new int[size];
+	SecureZeroMemory(ColorSet, size);
+
+	for (int i = 0; i < size; i++)
+	{
+		ColorSet[i] = Graphics::defaultColors;
+	}
+
+
+	for (int j = 0; j < size; j++)
+	{
+		setCursor(X - 3, Y + j);
+		setColor(ColorSet[j], fontSize);
+		std::cout << '[';
+		setCursor(X - 1, Y + j);
+		std::cout << ']';
+	}
+
+	while (true)
+	{
+		try
+		{
+			for (int j = 0; j < size; j++)
+			{
+				setCursor(X, Y + j);
+				setColor(ColorSet[j], fontSize);
+				std::cout << menuObject[j]->paragraphName;
+			}
+
+			key = _getch();
+
+
+			if (key == 72 && (counter > 1 && counter <= size))
+			{
+				counter--;
+			}
+			else if (key == 80 && (counter >= 0 && counter < size))
+			{
+				counter++;
+			}
+
+			else if (key == ' ')
+			{
+				if (selectedPoints[counter - 1] == NULL)
+				{
+					selectedPoints[counter - 1] = menuObject[counter - 1];
+					setCursor(X - 2, Y + (counter - 1));
+					setColor(defaultColors, fontSize);
+					std::cout << "*";
+				}
+				else if (selectedPoints[counter - 1] != NULL)
+				{
+					selectedPoints[counter - 1] = NULL;
+					setCursor(X - 2, Y + (counter - 1));
+					setColor(defaultColors, fontSize);
+					std::cout << " ";
+				}
+			}
+
+			else if (key == '\r')
+			{
+				setColor(defaultColors, fontSize);
+				return selectedPoints;
+			}
+
+			for (int i = 0; i < size; i++)
+			{
+				ColorSet[i] = defaultColors;
+			}
+
+			if (counter)
+			{
+				ColorSet[counter - 1] = secondaryColors;
+			}
+			DrawDescription(menuObject[counter - 1]->description);
+		}
+		catch (...)
+		{
+			counter = 1;
+			continue;
+		}
+	}
+}
+
 // Displays description of functions that is in menu
 void Menu::DrawDescription(std::string text)
 {
+	setColor(defaultColors, fontSize);
 	setCursor(descriptionField.originX + 3, descriptionField.originY + 3);
 
 	std::cout << text;
