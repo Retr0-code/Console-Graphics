@@ -7,7 +7,7 @@ This library was created to speed up the process of programming windows applicat
   * Dialog box ✔️
   * User advanced customization ✔️
   * Swithing between multiple menus ❌
-  * Check boxes ❌
+  * Check boxes ✔️
   * Tables ❌
   * Text redactor ❌
 
