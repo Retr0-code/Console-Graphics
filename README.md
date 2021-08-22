@@ -24,6 +24,6 @@ I hope you will enjoy using it, you can freely use examples as reference to your
 <br>
 
 # Documentation
-[![Documentation](https://img.shields.io/static/v1?label=Download&message=Documentation&color=blue)](https://retr0-code.github.io/Console-Graphics-Documentation/)
+[![Documentation](https://img.shields.io/static/v1?label=Visit&message=Documentation&color=blue)](https://retr0-code.github.io/Console-Graphics-Documentation/)
 
 It is not done yet. I will post it when I fix some bugs and rework some parts of code. You can download documentation by clicking the shield.
