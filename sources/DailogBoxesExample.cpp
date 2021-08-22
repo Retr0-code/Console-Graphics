@@ -13,10 +13,13 @@ int main()
 	// ----------- Initialize MessageBox ----------- //
 	MsgBox Dialog("TEST", window);
 
-	//int value = Dialog.Message(BOX_INFO);
+	// Default themes
+	int value = Dialog.Message(BOX_INFO);
 	//int value = Dialog.Message(BOX_WARNING);
 	//int value = Dialog.Message(BOX_ERROR);
-	int value = Dialog.Message({BG_BLUE + FG_BLACK, BG_WHITE + FG_RED, BG_GREEN + FG_RED});
+
+	// Custom theme
+	//int value = Dialog.Message({BG_BLUE + FG_BLACK, BG_WHITE + FG_RED, BG_GREEN + FG_RED});
 	
 	if (value)
 	{

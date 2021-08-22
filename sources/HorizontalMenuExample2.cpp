@@ -140,7 +140,6 @@ int main()
 	// Creates vertical menu orientation
 	menu.horizontal();
 
-
 	// Removing paragraphs objects to escape memory leak
 	delete fstPar, sndPar, trdPar, frtPar, objects;
 	SecureZeroMemory(menuNames, 4);

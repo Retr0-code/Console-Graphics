@@ -2,7 +2,7 @@
 #include "Semi-Graphics.h"
 
 
-// Clears the screen
+
 void cls(HANDLE hConsole)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -40,13 +40,7 @@ void cls(HANDLE hConsole)
 	SetConsoleCursorPosition(hConsole, csbi.dwCursorPosition);
 }
 
-// Calculates percent from number
-int calculatePercent(int digit, int perc)
-{
-	return (digit * perc) / 100;
-}
 
-// Sets default window settings with custom colors and font size E.g. 1920, 1090, 7, 31, 48
 Graphics::Graphics(int resolutionX, int resolutionY, color _defaultColor, color _secondaryColor, int _fontSize)
 {
 	defaultColors = _defaultColor.background + _defaultColor.frontground;
@@ -57,10 +51,10 @@ Graphics::Graphics(int resolutionX, int resolutionY, color _defaultColor, color 
 	if (_fontSize != NULL)
 	{
 		fontSize = _fontSize;
-		setColor(defaultColors, fontSize);
+		setTextProperties(defaultColors, fontSize);
 	}
 	else
-		setColor(defaultColors);
+		setTextProperties(defaultColors);
 
 	//MoveWindow(window_handle, x, y, width, height, redraw_window);
 	MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
@@ -71,7 +65,7 @@ Graphics::Graphics(int resolutionX, int resolutionY, color _defaultColor, color 
 	setCursor(0, 0);
 }
 
-// Sets default window settings without custom colors E.g. 1920, 1090, 48
+
 Graphics::Graphics(int resolutionX, int resolutionY, int _fontSize)
 {
 
@@ -79,10 +73,10 @@ Graphics::Graphics(int resolutionX, int resolutionY, int _fontSize)
 	if (_fontSize != NULL)
 	{
 		fontSize = _fontSize;
-		setColor(defaultColors, fontSize);
+		setTextProperties(defaultColors, fontSize);
 	}
 	else
-		setColor(defaultColors);
+		setTextProperties(defaultColors);
 	
 	//MoveWindow(window_handle, x, y, width, height, redraw_window);
 	MoveWindow(GetConsoleWindow(), 0, 0, resolutionX - fontSize * 2, resolutionY - fontSize * 2, TRUE);
@@ -92,8 +86,8 @@ Graphics::Graphics(int resolutionX, int resolutionY, int _fontSize)
 	setCursor(0, 0);
 }
 
-// Defines text color
-void Graphics::setColor(int color, int _fontSize)
+
+void Graphics::setTextProperties(int color, int _fontSize)
 {
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(cfi);
@@ -109,7 +103,7 @@ void Graphics::setColor(int color, int _fontSize)
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
 
-// Moves cursor to coordinates (X, Y)
+
 void Graphics::setCursor(int x, int y)
 {
 	COORD coordinates;
@@ -119,7 +113,7 @@ void Graphics::setCursor(int x, int y)
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coordinates);
 }
 
-// Calculates middle of screen
+
 int Graphics::calculatePosition(std::string list[], int size)
 {
 	int lengthMAX = list[0].length();
@@ -137,7 +131,7 @@ int Graphics::calculatePosition(std::string list[], int size)
 }
 
 
-// Constructs frame with custom segments
+
 Frame::Frame(int _originX, int _originY, int _Width, int _Height, frameSegments _segments)
 {
 	segments.leftTopCorner = _segments.leftTopCorner;
@@ -170,7 +164,7 @@ Frame::Frame(int _originX, int _originY, int _Width, int _Height, frameSegments 
 		segments.rightTopCorner = _segments.rightTopCorner;
 }
 
-// Constructs frame with default segments
+
 Frame::Frame(int _originX, int _originY, int _Width, int _Height)
 {
 	originX = _originX;
@@ -181,7 +175,7 @@ Frame::Frame(int _originX, int _originY, int _Width, int _Height)
 }
 
 
-// Creates frame around description
+
 void Frame::spawnFrame()
 {
 	setCursor(originX, originY);
@@ -223,7 +217,7 @@ void Frame::spawnFrame()
 
 
 
-// Fixed menu position of paragraphs without
+
 Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 {
 	X = _X;
@@ -238,7 +232,7 @@ Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphi
 		menuObject[i] = _menuObject[i];
 }
 
-// Centered vertical menu with centered position of paragraphs
+
 Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 {
 	std::string* objNames = new std::string[_size];
@@ -263,7 +257,7 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descr
 }
 
 
-// Creates menu with centered position in frame
+
 Menu::Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
 {
 	std::string* objNames = new std::string[_size];
@@ -287,11 +281,11 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics
 Menu::~Menu()
 {
 	delete menuObject;
-	setColor(defaultColors, fontSize);
+	setTextProperties(defaultColors, fontSize);
 }
 
 
-// Spawns Vertical Menu
+
 void Menu::vertical()
 {
 	int counter = 1;
@@ -312,7 +306,7 @@ void Menu::vertical()
 			for (int j = 0; j < size; j++)
 			{
 				setCursor(X, Y + j);
-				setColor(ColorSet[j], fontSize);
+				setTextProperties(ColorSet[j], fontSize);
 				std::cout << menuObject[j]->paragraphName;
 			}
 
@@ -332,7 +326,7 @@ void Menu::vertical()
 			{
 				if (counter)
 				{
-					setColor(defaultColors, fontSize);
+					setTextProperties(defaultColors, fontSize);
 					menuObject[counter - 1]->Execute();
 					break;
 				}
@@ -357,7 +351,7 @@ void Menu::vertical()
 	}
 }
 
-// Spawns horizontal menu
+
 void Menu::horizontal()
 {
 	int counter = 1;
@@ -389,7 +383,7 @@ void Menu::horizontal()
 			for (int j = 0; j < size; j++)
 			{
 				setCursor(X + X * j, Y);
-				setColor(ColorSet[j], fontSize);
+				setTextProperties(ColorSet[j], fontSize);
 				std::cout << menuObject[j]->paragraphName;
 			}
 
@@ -409,7 +403,7 @@ void Menu::horizontal()
 			{
 				if (counter)
 				{
-					setColor(defaultColors, fontSize);
+					setTextProperties(defaultColors, fontSize);
 					menuObject[counter - 1]->Execute();
 					break;
 				}
@@ -434,7 +428,7 @@ void Menu::horizontal()
 	}
 }
 
-// Spawns checkbox menu where you can choose multiple points (returns selected paragraphs)
+
 PARAGRAPH** Menu::checkBox()
 {
 	int counter = 1;
@@ -455,7 +449,7 @@ PARAGRAPH** Menu::checkBox()
 	for (int j = 0; j < size; j++)
 	{
 		setCursor(X - 3, Y + j);
-		setColor(ColorSet[j], fontSize);
+		setTextProperties(ColorSet[j], fontSize);
 		std::cout << '[';
 		setCursor(X - 1, Y + j);
 		std::cout << ']';
@@ -468,7 +462,7 @@ PARAGRAPH** Menu::checkBox()
 			for (int j = 0; j < size; j++)
 			{
 				setCursor(X, Y + j);
-				setColor(ColorSet[j], fontSize);
+				setTextProperties(ColorSet[j], fontSize);
 				std::cout << menuObject[j]->paragraphName;
 			}
 
@@ -490,21 +484,21 @@ PARAGRAPH** Menu::checkBox()
 				{
 					selectedPoints[counter - 1] = menuObject[counter - 1];
 					setCursor(X - 2, Y + (counter - 1));
-					setColor(defaultColors, fontSize);
+					setTextProperties(defaultColors, fontSize);
 					std::cout << "*";
 				}
 				else if (selectedPoints[counter - 1] != NULL)
 				{
 					selectedPoints[counter - 1] = NULL;
 					setCursor(X - 2, Y + (counter - 1));
-					setColor(defaultColors, fontSize);
+					setTextProperties(defaultColors, fontSize);
 					std::cout << " ";
 				}
 			}
 
 			else if (key == '\r')
 			{
-				setColor(defaultColors, fontSize);
+				setTextProperties(defaultColors, fontSize);
 				return selectedPoints;
 			}
 
@@ -527,24 +521,23 @@ PARAGRAPH** Menu::checkBox()
 	}
 }
 
-// Displays description of functions that is in menu
+
 void Menu::DrawDescription(std::string text)
 {
-	setColor(defaultColors, fontSize);
+	setTextProperties(defaultColors, fontSize);
 	setCursor(descriptionField.originX + 3, descriptionField.originY + 3);
 
 	std::cout << text;
 }
 
 
-// Spawns Dialog box of type that user wants
 BOOL MsgBox::Message(MSG_BOX_TYPE container)
 {
 	int originX = (width / 4) / lfontSize + 2;
 	int originY = ((height / 4) / lfontSize) * 3;
 
 
-	setColor(container.backgroundColor, lfontSize);
+	setTextProperties(container.backgroundColor, lfontSize);
 	Frame frame((width / 4) / lfontSize, (height / 4) / lfontSize, (width / lfontSize) * 2 - (width / 4) / lfontSize * 2, height / (lfontSize * 2));
 	frame.spawnFrame();
 
@@ -565,17 +558,17 @@ BOOL MsgBox::Message(MSG_BOX_TYPE container)
 	{
 		try
 		{
-			setColor(container.backgroundColor, lfontSize);
+			setTextProperties(container.backgroundColor, lfontSize);
 			setCursor(frame.originX + 3, frame.originY + 3);
 			std::cout << description;
 
 			setCursor(originX * 2, originY);
-			setColor(ColorSet[state], lfontSize);
+			setTextProperties(ColorSet[state], lfontSize);
 			std::cout << "  OK  ";
 
 
 			setCursor(originX * 4, originY);
-			setColor(ColorSet[state - 1], lfontSize);
+			setTextProperties(ColorSet[state - 1], lfontSize);
 			std::cout << "CANCEL";
 
 			key = _getch();
@@ -596,7 +589,7 @@ BOOL MsgBox::Message(MSG_BOX_TYPE container)
 			else if (key == '\r')
 			{
 
-				setColor(defaultColors, lfontSize);
+				setTextProperties(defaultColors, lfontSize);
 				return state;
 			}
 		}
