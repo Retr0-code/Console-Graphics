@@ -1,9 +1,8 @@
-﻿#include "pch.h"
-#include "Semi-Graphics.h"
+#include "../sources/Semi-Graphics.h"
 
-#define FONT_SIZE 36
-#define WINDOW_WIDTH 1240
-#define WINDOW_HEIGHT 820
+#define FONT_SIZE 42
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
 
 void A()
 {
@@ -93,13 +92,33 @@ public:
 	}
 };
 
+class fifthParagraph : public PARAGRAPH
+{
+public:
+	fifthParagraph(std::string _paragraphName, std::string _description) : PARAGRAPH(_paragraphName, _description)
+	{
+		paragraphName = _paragraphName;
+		description = _description;
+	}
+
+	void Execute() override
+	{
+		cls(GetStdHandle(STD_OUTPUT_HANDLE));
+		std::cout << "HHMMMMMMMMMMMMMMMMMMMMMMMM\n";
+	}
+};
+
 int main()
 {
-	Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, {BG_BLACK, FG_WHITE}, {BG_ORANGE, FG_BLACK}, FONT_SIZE);
+	Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE);
 
 	//window.makeFrame(0, 0, WINDOW_WIDTH / 10 - calculatePercent((WINDOW_WIDTH / 10), 11), WINDOW_HEIGHT / 10 - calculatePercent(WINDOW_HEIGHT / 10, 80) );
-	Frame frame(0, 0, (WINDOW_WIDTH / FONT_SIZE) * 2, WINDOW_HEIGHT / (FONT_SIZE * 2));
-	frame.spawnFrame();
+
+	Frame frame1(0, 15, WINDOW_WIDTH / (48 / 2) + 5, 5, { '+', NULL, NULL, NULL, '-', '|' });
+	Frame frame2(0, 1, WINDOW_WIDTH / (48 / 2) + 5, 13);
+
+	frame1.spawnFrame();
+	frame2.spawnFrame();
 
 	std::string menuNames[4] = { "1 MENU" , "2 HELP", "3 TEST", "4 EXIT" };
 	std::string menuDescriptions[4] = { "Displays this menu message", "Displays help message     ", "Displays message with test", "Shuts down the program    " };
@@ -115,17 +134,16 @@ int main()
 
 	// ----------- Initialize Menu ----------- //
 
-	Menu menu(4, objects, window, frame);
+	Menu menu(4, objects, window, frame2);
 
 	// Creates vertical menu orientation
-	menu.vertical();
-
+	menu.horizontal();
 
 	// Removing paragraphs objects to escape memory leak
 	delete fstPar, sndPar, trdPar, frtPar, objects;
-	SecureZeroMemory(menuNames, 4);
-	SecureZeroMemory(menuDescriptions, 4);
-	
+	SecureZeroMemory(menuNames, sizeof(menuNames));
+	SecureZeroMemory(menuDescriptions, sizeof(menuNames));
+
 	system("pause");
 
 	return 0;

@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "Semi-Graphics.h"
+﻿#include "Semi-Graphics.h"
 
 
 
@@ -232,7 +231,6 @@ Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphi
 		menuObject[i] = _menuObject[i];
 }
 
-
 Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 {
 	std::string* objNames = new std::string[_size];
@@ -253,10 +251,8 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descr
 	size = _size;
 	descriptionField = _descriptionField;
 
-	SecureZeroMemory(objNames, _size);
+	SecureZeroMemory(objNames, sizeof(objNames));
 }
-
-
 
 Menu::Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
 {
@@ -278,25 +274,28 @@ Menu::Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics
 	secondaryColors = _Graphics.secondaryColors;
 }
 
-Menu::~Menu()
-{
-	delete menuObject;
-	setTextProperties(defaultColors, fontSize);
-}
 
-
-
-void Menu::vertical()
+BOOL Menu::vertical(BOOL onlyDraw)
 {
 	int counter = 1;
 	char key;
 
 	int * ColorSet = new int[size];
-	SecureZeroMemory(ColorSet, size);
+	SecureZeroMemory(ColorSet, sizeof(ColorSet));
 
 	for (int i = 0; i < size; i++)
 	{
 		ColorSet[i] = Graphics::defaultColors;
+	}
+
+	std::string helps[3] = { "<- Back", "Enter OK", "TAB Switch/Exit" };
+
+	setTextProperties(secondaryColors, fontSize);
+	setCursor(4, 0);
+	for (int i = 0; i < 3; i++)
+	{
+		setCursor((windowWidth / fontSize / 3) * i + helps[i - 1].length() / 2 + 4, 0);
+		std::cout << helps[i];
 	}
 
 	while (true)
@@ -309,6 +308,31 @@ void Menu::vertical()
 				setTextProperties(ColorSet[j], fontSize);
 				std::cout << menuObject[j]->paragraphName;
 			}
+
+			if (key == '\b' || onlyDraw == TRUE)
+			{
+				for (int j = 0; j < size; j++)
+				{
+					setCursor(X, Y + j);
+					setTextProperties(defaultColors, fontSize);
+					std::cout << menuObject[j]->paragraphName;
+				}
+
+				return FALSE;
+			}
+			else if (key == '	')
+			{
+				for (int j = 0; j < size; j++)
+				{
+					setCursor(X, Y + j);
+					setTextProperties(defaultColors, fontSize);
+					std::cout << menuObject[j]->paragraphName;
+				}
+
+				ColorSet[counter - 1] = defaultColors;
+				return TRUE;
+			}
+
 
 			key = _getch();
 
@@ -328,7 +352,7 @@ void Menu::vertical()
 				{
 					setTextProperties(defaultColors, fontSize);
 					menuObject[counter - 1]->Execute();
-					break;
+					return FALSE;
 				}
 			}
 
@@ -351,14 +375,20 @@ void Menu::vertical()
 	}
 }
 
-
-void Menu::horizontal()
+BOOL Menu::horizontal(BOOL onlyDraw)
 {
 	int counter = 1;
 	char key;
 
-	int * ColorSet = new int[size];
-	SecureZeroMemory(ColorSet, size);
+	std::string helps[3] = { "<- Back", "Enter OK", "TAB Switch/Exit" };
+
+	setTextProperties(secondaryColors, fontSize);
+	setCursor(4, 0);
+	for (int i = 0; i < 3; i++)
+	{
+		setCursor((windowWidth / fontSize / 3) * i + helps[i - 1].length() / 2 + 4, 0);
+		std::cout << helps[i];
+	}
 
 	if (size % 2 != 0)
 	{
@@ -370,6 +400,9 @@ void Menu::horizontal()
 		X = X / (size / 2) - 2;
 		Y = Y - size / 6;
 	}
+
+	int * ColorSet = new int[size];
+	SecureZeroMemory(ColorSet, sizeof(ColorSet));
 
 	for (int i = 0; i < size; i++)
 	{
@@ -385,6 +418,30 @@ void Menu::horizontal()
 				setCursor(X + X * j, Y);
 				setTextProperties(ColorSet[j], fontSize);
 				std::cout << menuObject[j]->paragraphName;
+			}
+
+			if (key == '\b' || onlyDraw == TRUE)
+			{
+				for (int j = 0; j < size; j++)
+				{
+					setCursor(X, Y + j);
+					setTextProperties(defaultColors, fontSize);
+					std::cout << menuObject[j]->paragraphName;
+				}
+
+				return FALSE;
+			}
+			else if (key == '	')
+			{
+				for (int j = 0; j < size; j++)
+				{
+					setCursor(X, Y + j);
+					setTextProperties(defaultColors, fontSize);
+					std::cout << menuObject[j]->paragraphName;
+				}
+
+				ColorSet[counter - 1] = defaultColors;
+				return TRUE;
 			}
 
 			key = _getch();
@@ -428,17 +485,26 @@ void Menu::horizontal()
 	}
 }
 
-
 PARAGRAPH** Menu::checkBox()
 {
 	int counter = 1;
 	char key;
 
+	std::string helps[4] = { "<- Back", "Enter OK", "TAB Switch/Exit", "SPACE Select" };
+
+	setTextProperties(secondaryColors, fontSize);
+	setCursor(4, 0);
+	for (int i = 0; i < 4; i++)
+	{
+		setCursor((windowWidth / fontSize / 4) * i + helps[i - 1].length() / 2 + 4, 0);
+		std::cout << helps[i];
+	}
+
 	PARAGRAPH** selectedPoints = new PARAGRAPH*[size];
-	SecureZeroMemory(selectedPoints, size);
+	SecureZeroMemory(selectedPoints, sizeof(selectedPoints));
 
 	int * ColorSet = new int[size];
-	SecureZeroMemory(ColorSet, size);
+	SecureZeroMemory(ColorSet, sizeof(ColorSet));
 
 	for (int i = 0; i < size; i++)
 	{
@@ -521,6 +587,36 @@ PARAGRAPH** Menu::checkBox()
 	}
 }
 
+void Menu::switchMenu(Menu* menu1, Menu* menu2, BOOL(Menu::*abstractMenu1)(BOOL onlyDraw), BOOL(Menu::*abstractMenu2)(BOOL onlyDraw))
+{
+	(menu1->*abstractMenu1)(TRUE);
+	(menu2->*abstractMenu2)(TRUE);
+
+
+	BOOL menu2State = FALSE;
+	BOOL menu1State = (menu1->*abstractMenu1)(FALSE);
+
+	while (true)
+	{
+		if (menu1State && !menu2State)
+		{
+			std::cout << " ";
+			menu1State = FALSE;
+			menu2State = (menu2->*abstractMenu2)(FALSE);
+		}
+		else if (menu2State && !menu1State)
+		{
+			std::cout << " ";
+			menu2State = FALSE;
+			menu1State = (menu1->*abstractMenu1)(FALSE);
+		}
+		else if (!menu2State && !menu1State)
+		{
+			delete menu1, menu2;
+			break;
+		}
+	}
+}
 
 void Menu::DrawDescription(std::string text)
 {
@@ -547,7 +643,7 @@ BOOL MsgBox::Message(MSG_BOX_TYPE container)
 
 	int ColorSet[2];
 
-	SecureZeroMemory(ColorSet, 2);
+	SecureZeroMemory(ColorSet, sizeof(ColorSet));
 
 	for (int i = 0; i < 2; i++)
 	{

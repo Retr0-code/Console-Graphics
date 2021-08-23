@@ -1,13 +1,11 @@
 #pragma once
-#include "pch.h"
 #include "colors.h"
 
-/*
 #include <string>
 #include <conio.h>
 #include <iostream>
 #include <windows.h>
-*/
+
 
 /** \struct frameSegments
  *  \brief This structure used to pass segments of a frame as arguments (leftTopCorner, rightTopCorner, leftDownCorner, rightDownCorner, horizontal, vertical).
@@ -272,6 +270,7 @@ private:
 	Frame descriptionField;								//!< Contains frame where desription of paragraphs will be displayed.
 
 public:
+
 	/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 	 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
 	 *
@@ -305,17 +304,22 @@ public:
 	 */
 	Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField);
 
-	~Menu();
 
-	/** \fn vertical()
+	/** \fn vertical(BOOL onlyDraw = FALSE)
 	 *	\brief Spawns vertical menu with properties that was supplied in constructor.
+	 *
+	 *	\param onlyDraw		Gets boolean value which sets flag to only draw menu.
+	 *	\return				TRUE if pressed TAB, and FALSE if pressed BACK or flag 'onlyDraw' is TRUE.
 	 */
-	void vertical();
+	BOOL vertical(BOOL onlyDraw = FALSE);
 
-	/** \fn horizontal()
+	/** \fn horizontal(BOOL onlyDraw = FALSE)
 	 *	\brief Spawns horizontal menu with properties that was supplied in constructor.
+	 *
+	 *	\param onlyDraw		Gets boolean value which sets flag to only draw menu.
+	 *	\return				TRUE if pressed TAB, and FALSE if pressed BACK or flag 'onlyDraw' is TRUE.
 	 */
-	void horizontal();
+	BOOL horizontal(BOOL onlyDraw = FALSE);
 
 	/** \fn checkBox()
 	 *	\brief Spawns vertical menu where user can choose multiple options with properties that was supplied in constructor.
@@ -323,6 +327,18 @@ public:
 	 *	\return Massive of objects that was chosen.
 	 */
 	PARAGRAPH** checkBox();
+
+	/** \fn switchMenu(Menu* meun1, Menu* meun2, BOOL(Menu::*abstractMenu1)(BOOL onlyDraw), BOOL(Menu::*abstractMenu2)(BOOL onlyDraw))
+	 *	\brief Spawns two menus by supplied objects and methods.
+	 *
+	 *	\param menu1			Gets pointer to first Menu object.
+	 *	\param menu2			Gets pointer to second Menu object.
+	 *	\param *abstractMenu1	Gets pointer to method for spawning first menu.
+	 *	\param *abstractMenu2	Gets pointer to method for spawning second menu.
+	 *
+	 *	\example switchMenu menu.switchMenu(menu1, menu2, &Menu::vertical, &Menu::horizontal);
+	 */
+	void switchMenu(Menu* menu1, Menu* menu2, BOOL(Menu::*abstractMenu1)(BOOL onlyDraw), BOOL(Menu::*abstractMenu2)(BOOL onlyDraw));
 
 private:
 	Menu() = default;

@@ -1,7 +1,7 @@
 #pragma once
 
 #define FG_BLACK	0
-#define FG_COLOR	1
+#define FG_BLUE		1
 #define FG_GREEN	2
 #define FG_lBLUE	3
 #define FG_RED		4

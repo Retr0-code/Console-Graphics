@@ -1,9 +1,8 @@
-#include "pch.h"
-#include "Semi-Graphics.h"
+#include "../sources/Semi-Graphics.h"
 
 #define FONT_SIZE 36
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 720
+#define WINDOW_WIDTH 1650
+#define WINDOW_HEIGHT 1050
 
 
 int main()
