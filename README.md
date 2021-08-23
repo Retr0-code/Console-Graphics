@@ -3,7 +3,7 @@
 
 This library was created to speed up the process of programming windows applications in C++ using console (pseudo) graphics. The library is designed for beginners like me. The functionality will be updated depending on the time and ideas.
 
-## What is done?
+## What is already done?
   - [✔️] Basic vertical menu 
   - [✔️] Basic horizontal menu
   - [✔️] Dialog box
