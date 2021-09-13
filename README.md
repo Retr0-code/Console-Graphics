@@ -4,14 +4,15 @@
 This library was created to speed up the process of programming windows applications in C++ using console (pseudo) graphics. The library is designed for beginners like me. The functionality will be updated depending on the time and ideas.
 
 ## What is already done?
-  - [✔️] Basic vertical menu 
-  - [✔️] Basic horizontal menu
-  - [✔️] Dialog box
-  - [✔️] User advanced customization
-  - [✔️] Check boxes
-  - [✔️] Swithing between multiple menus 
-  - [❌] Tables
-  - [❌] Text redactor
+  - [x] Basic vertical menu 
+  - [x] Basic horizontal menu
+  - [x] Dialog box
+  - [x] User advanced customization
+  - [x] Check boxes
+  - [x] Swithing between multiple menus 
+  - [x] Dropdown menu
+  - [ ] Tables
+  - [ ] Text redactor
 
 <br>
 
