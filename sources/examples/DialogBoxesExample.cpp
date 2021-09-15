@@ -13,12 +13,13 @@ int main()
 	MsgBox Dialog("TEST", window);
 
 	// Default themes
-	int value = Dialog.Message(BOX_INFO);
+	//int value = Dialog.Message(BOX_INFO);
 	//int value = Dialog.Message(BOX_WARNING);
-	//int value = Dialog.Message(BOX_ERROR);
+	int value = Dialog.Message(BOX_ERROR);
 
 	// Custom theme
 	//int value = Dialog.Message({BG_BLUE + FG_BLACK, BG_WHITE + FG_RED, BG_GREEN + FG_RED});
+	//int value = Dialog.Message({BG_BLUE + FG_BLACK, BG_WHITE + FG_RED, BG_GREEN + FG_RED, "LMAO"});
 	
 	if (value)
 	{
@@ -27,7 +28,6 @@ int main()
 	}
 	else
 		return 0;
-	
 
 	system("pause");
 

@@ -99,7 +99,7 @@ int main()
 
 	//window.makeFrame(0, 0, WINDOW_WIDTH / 10 - calculatePercent((WINDOW_WIDTH / 10), 11), WINDOW_HEIGHT / 10 - calculatePercent(WINDOW_HEIGHT / 10, 80) );
 	Frame frame(0, 1, (WINDOW_WIDTH / FONT_SIZE) * 2 - 4, WINDOW_HEIGHT / (FONT_SIZE * 2));
-	frame.spawnFrame();
+	frame.SpawnFrame("");
 
 	std::string menuNames[4] = { "1 MENU" , "2 HELP", "3 TEST", "4 EXIT" };
 	std::string menuDescriptions[4] = { "Displays this menu message", "Displays help message     ", "Displays message with test", "Shuts down the program    " };
@@ -115,10 +115,10 @@ int main()
 
 	// ----------- Initialize Menu ----------- //
 
-	Menu menu(4, objects, window, frame);
+	vMenu menu(4, objects, frame, window);
 
 	// Creates vertical menu orientation
-	menu.vertical();
+	menu.SpawnMenu();
 
 
 	// Removing paragraphs objects to escape memory leak
@@ -126,7 +126,7 @@ int main()
 	SecureZeroMemory(menuNames, sizeof(menuNames));
 	SecureZeroMemory(menuDescriptions, sizeof(menuNames));
 
-	system("pause");
+	_getch();
 
 	return 0;
 }

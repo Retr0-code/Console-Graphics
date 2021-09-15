@@ -99,10 +99,8 @@ int main()
 
 	Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE);
 
-	//window.makeFrame(0, 0, WINDOW_WIDTH / 10 - calculatePercent((WINDOW_WIDTH / 10), 11), WINDOW_HEIGHT / 10 - calculatePercent(WINDOW_HEIGHT / 10, 80) );
-
-	Frame frame1(0, 1, 10, WINDOW_HEIGHT / FONT_SIZE - 5, { '+', NULL, NULL, NULL, '-', '|', '[', ']' });
-	Frame frame2(12, 1, WINDOW_WIDTH / (48 / 2) - 4, WINDOW_HEIGHT / FONT_SIZE - 5);
+	Frame frame1(0, 1, 12, WINDOW_HEIGHT / FONT_SIZE - 5, { '+', NULL, NULL, NULL, '-', '|', '[', ']' });
+	Frame frame2(14, 1, WINDOW_WIDTH / (48 / 2) - 6, WINDOW_HEIGHT / FONT_SIZE - 5);
 
 	frame1.SpawnFrame("Menu");
 	frame2.SpawnFrame("Description");
@@ -119,16 +117,21 @@ int main()
 
 	PARAGRAPH* objects[4] = { fstPar, sndPar, trdPar, frtPar };
 
-	// ----------- Initialize Menu ----------- //
+	// ----------- Initialize Menus ----------- //
 
-	vMenu menu(4, objects, frame1, frame2, window);
+	dMenu* menuD = new dMenu(4, objects, frame1, frame2, window);
+	vMenu* menu1 = new vMenu(4, objects, frame1, frame2, window);
+	vMenu* menu2 = new vMenu(4, objects, frame1, frame2, window);
+	vMenu* menu3 = new vMenu(4, objects, frame1, frame2, window);
+	vMenu* menu4 = new vMenu(4, objects, frame1, frame2, window);
 
-	// Creates vertical menu orientation
-	menu.SpawnMenu();
+	vMenu* menus[4] = { menu1, menu2, menu3, menu4 };
 
+	menuD->SpawnMenu(menus);
 
 	// Removing paragraphs objects to escape memory leak
 	delete fstPar, sndPar, trdPar, frtPar, objects;
+	delete menu1, menu2, menu3, menu4, menuD;
 	SecureZeroMemory(menuNames, sizeof(menuNames));
 	SecureZeroMemory(menuDescriptions, sizeof(menuNames));
 

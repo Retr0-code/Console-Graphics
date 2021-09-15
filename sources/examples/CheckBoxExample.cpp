@@ -1,8 +1,8 @@
 #include "../sources/Semi-Graphics.h"
 
-#define FONT_SIZE 42
-#define WINDOW_WIDTH 1920
-#define WINDOW_HEIGHT 1080
+#define FONT_SIZE 36
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 820
 
 void A()
 {
@@ -96,17 +96,9 @@ int main()
 {
 	
 	Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, { BG_BLACK, FG_WHITE }, { BG_ORANGE, FG_BLACK }, FONT_SIZE);
-	//window.setTextProperties(window.defaultColors, FONT_SIZE);
-
-	//int Y = window.windowHeight / window.fontSize - 4;
-	//int X = window.windowWidth / window.fontSize / 4;
-	//window.setCursor(X, Y);
-
-	//std::cout << X << " " << Y;
-
 	
 	Frame frame(0, 1, (WINDOW_WIDTH / FONT_SIZE) * 2 - 4, WINDOW_HEIGHT / (FONT_SIZE * 2));
-	frame.spawnFrame();
+	frame.SpawnFrame("");
 
 	std::string menuNames[4] = { "1 MENU" , "2 HELP", "3 TEST", "4 EXIT" };
 	std::string menuDescriptions[4] = { "Displays this menu message", "Displays help message     ", "Displays message with test", "Shuts down the program    " };
@@ -122,10 +114,10 @@ int main()
 
 	// ----------- Initialize Menu ----------- //
 
-	Menu menu(4, objects, window, frame);
+	cMenu menu(4, objects, frame, window);
 
 	// Creates vertical menu orientation
-	PARAGRAPH** selected = menu.checkBox();
+	PARAGRAPH** selected = menu.SpawnMenu();
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -135,13 +127,13 @@ int main()
 			continue;
 	}
 
+	_getch();
+	
 	// Removing paragraphs objects to escape memory leak
 	delete fstPar, sndPar, trdPar, frtPar, objects;
 	SecureZeroMemory(selected, sizeof(selected));
 	SecureZeroMemory(menuNames, sizeof(menuNames));
 	SecureZeroMemory(menuDescriptions, sizeof(menuNames));
-
-	system("pause");
 
 	return 0;
 }

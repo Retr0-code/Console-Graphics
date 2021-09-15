@@ -98,7 +98,7 @@ int main()
 
 	//window.makeFrame(0, 0, WINDOW_WIDTH / 10 - calculatePercent((WINDOW_WIDTH / 10), 11), WINDOW_HEIGHT / 10 - calculatePercent(WINDOW_HEIGHT / 10, 80) );
 	Frame frame(0, 1, (WINDOW_WIDTH / FONT_SIZE) * 2 - 4, WINDOW_HEIGHT / (FONT_SIZE * 2));
-	frame.spawnFrame();
+	frame.SpawnFrame("");
 
 	std::string menuNames[4] = { "1 MENU" , "2 HELP", "3 TEST", "4 EXIT" };
 	std::string menuDescriptions[4] = { "Displays this menu message", "Displays help message     ", "Displays message with test", "Shuts down the program    " };
@@ -114,19 +114,20 @@ int main()
 
 	// ----------- Initialize Menu ----------- //
 
-	Menu* menu1 = new Menu(4, 10, 13, objects, window, frame);
-	Menu* menu2 = new Menu(4, objects, window, frame);
-	Menu switch2Menu(4, objects, window, frame);
+	vMenu menu1(4, 10, 13, objects, frame, window);
+
+	vMenu menu2(4, objects, frame, window);
+
+	sMenu switch2Menu(4, objects, frame, window);
 
 	// Creates two vertical menu orientation
-	switch2Menu.switchMenu(menu1, menu2, &Menu::vertical, &Menu::vertical);
+	switch2Menu.SpawnMenu(&menu1, &menu2);
 
 	
 	system("pause");
 
 	// Removing paragraphs objects to escape memory leak
 	delete fstPar, sndPar, trdPar, frtPar, objects;
-	delete menu1, menu2;
 	SecureZeroMemory(menuNames, sizeof(menuNames));
 	SecureZeroMemory(menuDescriptions, sizeof(menuNames));
 

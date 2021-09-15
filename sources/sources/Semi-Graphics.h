@@ -1,14 +1,15 @@
 #pragma once
 #include "colors.h"
 
+#include <map>
+#include <vector>
 #include <string>
 #include <conio.h>
 #include <iostream>
 #include <windows.h>
 
-
 /** \struct frameSegments
- *  \brief This structure used to pass segments of a frame as arguments (leftTopCorner, rightTopCorner, leftDownCorner, rightDownCorner, horizontal, vertical).
+ *  \brief This structure used to pass segments of a frame as arguments (leftTopCorner, rightTopCorner, leftDownCorner, rightDownCorner, Horizontal, Vertical).
  *  \var frameSegments::leftTopCorner
  *  Field 'leftTopCorner' contains segment of left top corner. If you use only one corner segment, you can supply only this field and other would be filled later.
  *  \var frameSegments::rightTopCorner
@@ -17,10 +18,14 @@
  *  Field 'leftDownCorner' contains segment of left down corner.
  *	\var frameSegments::rightDownCorner
  *  Field 'rightDownCorner' contains segment of right down corner.
- *	\var frameSegments::horizontal
- *	Field 'rightDownCorner' contains segment of horizontal segment.
- *	\var frameSegments::vertical
- *	Field 'rightDownCorner' contains segment of vertical segment.
+ *	\var frameSegments::Horizontal
+ *	Field 'rightDownCorner' contains segment of Horizontal segment.
+ *	\var frameSegments::Vertical
+ *	Field 'rightDownCorner' contains segment of Vertical segment.
+ *	\var frameSegments::leftStop
+ *	Field 'leftStop' contains plug char for the left side.
+ *	\var frameSegments::rightStop
+ *	Field 'rightStop' contains plug char for the rigth side (between left and rigth plugs will be displayed header of frame).
  */
 typedef struct
 {
@@ -28,8 +33,10 @@ typedef struct
 	char rightTopCorner;
 	char leftDownCorner;
 	char rightDownCorner;
-	char horizontal;
-	char vertical;
+	char Horizontal;
+	char Vertical;
+	char leftStop;
+	char rightStop;
 } frameSegments;
 
 /** \struct color
@@ -59,6 +66,7 @@ typedef struct
 	int selectColor;
 	int deselectColor;
 	int backgroundColor;
+	std::string boxHeader;
 } MSG_BOX_TYPE;
 
 
@@ -66,19 +74,19 @@ typedef struct
  *	Defines dialog box type as information box
  *	(selection color black on white, deselection color white on black, dialog box color white on azure)
  */
-#define BOX_INFO { BG_WHITE + FG_BLACK, BG_BLACK + FG_WHITE, BG_AZURE + FG_WHITE }
+#define BOX_INFO { BG_WHITE + FG_BLACK, BG_BLACK + FG_WHITE, BG_AZURE + FG_WHITE, "INFO" }
 
 /** \def BOX_ERROR
  *	Defines dialog box type as information box
  *	(selection color black on white, deselection color white on black, dialog box color black on red)
  */
-#define BOX_ERROR { BG_WHITE + FG_BLACK, BG_BLACK + FG_WHITE, BG_RED + FG_BLACK }
+#define BOX_ERROR { BG_WHITE + FG_BLACK, BG_BLACK + FG_WHITE, BG_RED + FG_BLACK, "ERROR" }
 
 /** \def BOX_WARNING
  *	Defines dialog box type as information box
  *	(selection color black on white, deselection color white on black, dialog box color black on orange)
  */
-#define BOX_WARNING { BG_WHITE + FG_BLACK, BG_BLACK + FG_WHITE, BG_ORANGE + FG_BLACK }
+#define BOX_WARNING { BG_WHITE + FG_BLACK, BG_BLACK + FG_WHITE, BG_ORANGE + FG_BLACK, "WARNING" }
 
 
 /** \fn cls(HANDLE hConsole)
@@ -132,23 +140,23 @@ public:
 class Graphics
 {
 protected:
-	/** \fn setTextProperties(int color, int _fontSize = 48)
+	/** \fn SetTextProperties(int color, int _fontSize = 48)
 	 *	\brief This method changes color and font size
 	 *	
 	 *	\param color		Gets integer value of color
 	 *	\param _fontSize	Gets integer value of font size
 	 */
-	void setTextProperties(int color, int _fontSize = 48);
+	void SetTextProperties(int color, int _fontSize = 48);
 
-	/** \fn setCursor(int x, int y)
+	/** \fn SetCursorPosition(int x, int y)
 	 *	\brief This method moves cursor to supplied coordinates.
 	 *
 	 *	\param x	Integer value of coordinate on X axis.
 	 *	\param y	Integer value of coordinate on Y axis.
 	 */
-	void setCursor(int x, int y);
+	void SetCursorPosition(int x, int y);
 
-	/** \fn calculatePosition(std::string list[], int size)
+	/** \fn CalculatePosition(std::string list[], int size)
 	 *	\brief This method calculates center of screen for proper menu displaying.
 	 *
 	 *	\details Method gets on input massive of paragraphs' names and size of massive and return length of the biggest name.
@@ -158,12 +166,16 @@ protected:
 	 *
 	 *	\return Length of the biggest name.
 	 */
-	int calculatePosition(std::string list[], int size);
+	int CalculatePosition(std::string list[], int size);
 
 	/** \fn Graphics()
 	 *	\brief This is default constructor of class 'Graphics' that cannot be reached from outside.
 	 */
 	Graphics() = default;
+
+	
+	int* FillColorSet(int color, int size);
+
 
 public:
 	int fontSize = 48;			//!< By default font size is 48, you can change it in constructor while creating an object.
@@ -184,11 +196,11 @@ public:
 	 *	\param _secondaryColor	Gets color structure for secondaryColors.
 	 *	\param _fontSize		Gets integer value for fontSize.
 	 *	
-	 *	\exmample Graphics window(1920, 1080, { BG_BLACK, FG_WHITE }, { BG_ORANGE, FG_BLACK }, 48);
+	 *	\example DefineWindowsProperties1 Graphics window(1920, 1080, { BG_BLACK, FG_WHITE }, { BG_ORANGE, FG_BLACK }, 48);
 	 */
 	Graphics(int resolutionX, int resolutionY, color _defaultColor, color _secondaryColor, int _fontSize);
 
-	/** \fn Graphics(int resolutionX, int resolutionY, color _defaultColor, color _secondaryColor, int _fontSize)
+	/** \fn Graphics(int resolutionX, int resolutionY, int _fontSize)
 	 *	\brief Public constructor of 'Graphics' class without setting colors ability.
 	 *
 	 *	\details Public constructor of 'Graphics' class without setting colors ability. Sets default window size and font size
@@ -196,7 +208,7 @@ public:
 	 *	\param resolutionY		Height of the window.
 	 *	\param _fontSize		Gets integer value for fontSize.
 	 *
-	 *	\exmample Graphics window(1920, 1080, 48);
+	 *	\example DefineWindowsProperties2 Graphics window(1920, 1080, 48);
 	 */
 	Graphics(int resolutionX, int resolutionY, int _fontSize);
 };
@@ -216,7 +228,7 @@ public:
 	 */
 	Frame() = default;
 
-	frameSegments segments = { (char)201, (char)187, (char)200, (char)188, (char)205, (char)186 };		//!< Segments of a frame is double line chars.
+	frameSegments segments = { (char)201, (char)187, (char)200, (char)188, (char)205, (char)186, (char)185, (char)204 };		//!< Segments of a frame is double line chars.
 	int originX = 0;		//!< Coordinate on X axis of a frame origin (beginning)
 	int originY = 0;		//!< Coordinate on Y axis of a frame origin (beginning)
 	int Width;			//!< Width of a frame
@@ -249,27 +261,27 @@ public:
 	 */
 	Frame(int _originX, int _originY, int _Width, int _Height);
 	
-	/** \fn spawnFrame()
+	/** \fn SpawnFrame()
 	 *	\brief This function spawns frame by using parameters that was passed in constructor.
+	 *
+	 *	\param frameHeader	Gets text that will be displayed on the top of frame.
 	 */
-	void spawnFrame();
+	void SpawnFrame(std::string frameHeader);
 };
 
 
 /** \class Menu
- *	\brief This class is used to spawn different kinds of menus (vertical, horizontal, checkbox)
+ *	\brief This class is used to spawn different kinds of menus (Vertical, Horizontal, checkbox)
  */
 class Menu : protected Frame
 {
-private:
+protected:
 	int X;			//!< Contains menu origin coordiante on X axis.
 	int Y;			//!< Contains menu origin coordiante on Y axis.
 	int size;		//!< Contains amount of menu points (paragraphs).
 	int fontSize;	//!< Font size of menu text.
-	PARAGRAPH** menuObject = new PARAGRAPH*[size];		//!< Contains elements of menu.
+	std::vector <PARAGRAPH*> menuObject;					//!< Contains elements of menu.
 	Frame descriptionField;								//!< Contains frame where desription of paragraphs will be displayed.
-
-public:
 
 	/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 	 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
@@ -281,7 +293,39 @@ public:
 	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 	 *	\param _descriptionField	Contains Frame object where description will be displayed.
 	 */
-	Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField);
+	Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+
+	Menu() = default;
+
+	
+	/** \fn DrawDescription(std::string text)
+	 *	\brief This method displays description for element of menu. (is inaccessacle from outside the class)
+	 *
+	 *	\param text		Gets string that will be displayed in frame.
+	 */
+	void DrawDescription(std::string text);
+
+	virtual void DrawMenu(int _ColorSet[]) = 0;
+
+public:
+	virtual BOOL SpawnMenu(bool onlyDraw = false) = 0;
+};
+
+
+class vMenu : public Menu 
+{
+public:
+	/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _X					Gets integer value of X axis coordinate.
+	 *	\param _Y					Gets integer value of Y axis coordinate.
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	vMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
 
 	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 	 *	\brief This constructor creates menu in center of window.
@@ -291,7 +335,7 @@ public:
 	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 	 *	\param _descriptionField	Contains Frame object where description will be displayed.
 	 */
-	Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField);
+	vMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
 
 	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
 	 *	\brief This constructor creates menu in center of Frame.
@@ -302,54 +346,209 @@ public:
 	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 	 *	\param _descriptionField	Contains Frame object where description will be displayed.
 	 */
-	Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField);
+	vMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
+
+	BOOL SpawnMenu(bool onlyDraw = false);
+
+protected:
+
+	void DrawMenu(int _ColorSet[]) override;
+};
 
 
-	/** \fn vertical(BOOL onlyDraw = FALSE)
-	 *	\brief Spawns vertical menu with properties that was supplied in constructor.
+class hMenu : public Menu
+{
+public:
+	/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _X					Gets integer value of X axis coordinate.
+	 *	\param _Y					Gets integer value of Y axis coordinate.
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	hMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in center of window.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	hMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in center of Frame.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Frame				Contains Frame object where menu will be spawned.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	hMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn hMenu::SpawnMenu(BOOL onlyDraw = FALSE)
+	 *	\brief Spawns Horizontal menu with properties that was supplied in constructor.
 	 *
 	 *	\param onlyDraw		Gets boolean value which sets flag to only draw menu.
 	 *	\return				TRUE if pressed TAB, and FALSE if pressed BACK or flag 'onlyDraw' is TRUE.
 	 */
-	BOOL vertical(BOOL onlyDraw = FALSE);
+	BOOL SpawnMenu(bool onlyDraw = false);
 
-	/** \fn horizontal(BOOL onlyDraw = FALSE)
-	 *	\brief Spawns horizontal menu with properties that was supplied in constructor.
+private:
+
+	void DrawMenu(int _ColorSet[]) override;
+};
+
+
+class cMenu : protected vMenu
+{
+public:
+	/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
 	 *
-	 *	\param onlyDraw		Gets boolean value which sets flag to only draw menu.
-	 *	\return				TRUE if pressed TAB, and FALSE if pressed BACK or flag 'onlyDraw' is TRUE.
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _X					Gets integer value of X axis coordinate.
+	 *	\param _Y					Gets integer value of Y axis coordinate.
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
 	 */
-	BOOL horizontal(BOOL onlyDraw = FALSE);
+	cMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
 
-	/** \fn checkBox()
-	 *	\brief Spawns vertical menu where user can choose multiple options with properties that was supplied in constructor.
+	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in center of window.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	cMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in center of Frame.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Frame				Contains Frame object where menu will be spawned.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	cMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn cMenu::SpawnMenu()
+	 *	\brief Spawns Vertical menu where user can choose multiple options with properties that was supplied in constructor.
 	 *
 	 *	\return Massive of objects that was chosen.
 	 */
-	PARAGRAPH** checkBox();
+	PARAGRAPH** SpawnMenu();
+};
 
-	/** \fn switchMenu(Menu* meun1, Menu* meun2, BOOL(Menu::*abstractMenu1)(BOOL onlyDraw), BOOL(Menu::*abstractMenu2)(BOOL onlyDraw))
-	 *	\brief Spawns two menus by supplied objects and methods.
+
+class sMenu : protected vMenu
+{
+public:
+	/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
 	 *
-	 *	\param menu1			Gets pointer to first Menu object.
-	 *	\param menu2			Gets pointer to second Menu object.
-	 *	\param *abstractMenu1	Gets pointer to method for spawning first menu.
-	 *	\param *abstractMenu2	Gets pointer to method for spawning second menu.
-	 *
-	 *	\example switchMenu menu.switchMenu(menu1, menu2, &Menu::vertical, &Menu::horizontal);
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _X					Gets integer value of X axis coordinate.
+	 *	\param _Y					Gets integer value of Y axis coordinate.
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
 	 */
-	void switchMenu(Menu* menu1, Menu* menu2, BOOL(Menu::*abstractMenu1)(BOOL onlyDraw), BOOL(Menu::*abstractMenu2)(BOOL onlyDraw));
+	sMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in center of window.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	sMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in center of Frame.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Frame				Contains Frame object where menu will be spawned.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	sMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn SwitchMenu(Menu* meun1, Menu* meun2, BOOL(Menu::*abstractMenu1)(BOOL onlyDraw), BOOL(Menu::*abstractMenu2)(BOOL onlyDraw))
+ *	\brief Spawns two menus by supplied objects and methods.
+ *
+ *	\param menu1			Gets pointer to first Menu object.
+ *	\param menu2			Gets pointer to second Menu object.
+ *	\param *abstractMenu1	Gets pointer to method for spawning first menu.
+ *	\param *abstractMenu2	Gets pointer to method for spawning second menu.
+ *
+ *	\example SwitchMenu menu.SwitchMenu(menu1, menu2, &Menu::Vertical, &Menu::Horizontal);
+ */
+	void SpawnMenu(Menu* menu1, Menu* menu2);
+};
+
+
+class dMenu : protected Menu
+{
+public:
+	/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _X					Gets integer value of X axis coordinate.
+	 *	\param _Y					Gets integer value of Y axis coordinate.
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	dMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in center of window.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	dMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+
+	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
+	 *	\brief This constructor creates menu in center of Frame.
+	 *
+	 *	\param _size				Gets integer value size of menu (amount of points).
+	 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
+	 *	\param _Frame				Contains Frame object where menu will be spawned.
+	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
+	 *	\param _descriptionField	Contains Frame object where description will be displayed.
+	 */
+	dMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
+
+	BOOL SpawnMenu(vMenu* paragraphs[], bool onlyDraw = false);
+
+	BOOL SpawnMenu(bool onlyDraw = false) override
+	{
+		return FALSE;
+	}
 
 private:
-	Menu() = default;
-
-	/** \fn DrawDescription(std::string text)
-	 *	\brief This method displays description for element of menu. (is inaccessacle from outside the class)
-	 *
-	 *	\param text		Gets string that will be displayed in frame.
-	 */
-	void DrawDescription(std::string text);
+	void DrawMenu(int _ColorSet[]);
 };
+
+
 
 /** \class MsgBox
  *	\brief This class is used for creating dialog boxes.

@@ -1,8 +1,8 @@
 #include "../sources/Semi-Graphics.h"
 
-#define FONT_SIZE 42
-#define WINDOW_WIDTH 1920
-#define WINDOW_HEIGHT 1080
+#define FONT_SIZE 36
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 820
 
 void A()
 {
@@ -114,11 +114,11 @@ int main()
 
 	//window.makeFrame(0, 0, WINDOW_WIDTH / 10 - calculatePercent((WINDOW_WIDTH / 10), 11), WINDOW_HEIGHT / 10 - calculatePercent(WINDOW_HEIGHT / 10, 80) );
 
-	Frame frame1(0, 15, WINDOW_WIDTH / (48 / 2) + 5, 5, { '+', NULL, NULL, NULL, '-', '|' });
-	Frame frame2(0, 1, WINDOW_WIDTH / (48 / 2) + 5, 13);
+	Frame frame1(0, 12, WINDOW_WIDTH / (48 / 2) + 14, 6, { '+', NULL, NULL, NULL, '-', '|' });
+	Frame frame2(0, 1, WINDOW_WIDTH / (48 / 2) + 14, 10);
 
-	frame1.spawnFrame();
-	frame2.spawnFrame();
+	frame1.SpawnFrame("");
+	frame2.SpawnFrame("");
 
 	std::string menuNames[4] = { "1 MENU" , "2 HELP", "3 TEST", "4 EXIT" };
 	std::string menuDescriptions[4] = { "Displays this menu message", "Displays help message     ", "Displays message with test", "Shuts down the program    " };
@@ -134,17 +134,17 @@ int main()
 
 	// ----------- Initialize Menu ----------- //
 
-	Menu menu(4, objects, window, frame2);
+	hMenu menu(4, objects, frame1, frame2, window);
 
 	// Creates vertical menu orientation
-	menu.horizontal();
+	menu.SpawnMenu();
 
 	// Removing paragraphs objects to escape memory leak
 	delete fstPar, sndPar, trdPar, frtPar, objects;
 	SecureZeroMemory(menuNames, sizeof(menuNames));
 	SecureZeroMemory(menuDescriptions, sizeof(menuNames));
 
-	system("pause");
+	_getch();
 
 	return 0;
 }
