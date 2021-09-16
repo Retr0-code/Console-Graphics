@@ -40,6 +40,9 @@ void cls(HANDLE hConsole)
 }
 
 
+
+// --------------| Main setup class |--------------
+
 Graphics::Graphics(int resolutionX, int resolutionY, color _defaultColor, color _secondaryColor, int _fontSize)
 {
 	defaultColors = _defaultColor.background + _defaultColor.frontground;
@@ -140,6 +143,8 @@ int* Graphics::FillColorSet(int color, int size)
 }
 
 
+
+// --------------| Frame class |--------------
 
 Frame::Frame(int _originX, int _originY, int _Width, int _Height, frameSegments _segments)
 {
@@ -245,6 +250,9 @@ void Frame::SpawnFrame(std::string frameHeader)
 }
 
 
+
+// --------------| Menu interface class |--------------
+
 Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics)
 {
 	X = _X;
@@ -261,6 +269,79 @@ Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descripti
 		menuObject.push_back(_menuObject[i]);
 }
 
+//int Menu::MenuLoop(int switchKey1, int switchKey2, char conditionKey, int colorSet[], void(*condition)())
+
+int Menu::MenuLoop(int switchKey1, int switchKey2, char conditionKey, int colorSet[])
+{
+	int counter = 1;
+	char key;
+
+	while (true)
+	{
+		try
+		{
+			DrawMenu(colorSet);
+
+			if (key == BACKSPACE)
+			{
+				colorSet = FillColorSet(defaultColors, size);
+				DrawMenu(colorSet);
+
+				delete[] colorSet;
+				return MENU_EXIT;
+			}
+			else if (key == TAB)
+			{
+				DrawMenu(colorSet);
+
+				colorSet[counter - 1] = defaultColors;
+				delete[] colorSet;
+				return MENU_SWITCH;
+			}
+
+
+			key = _getch();
+
+
+			if (key == switchKey1 && (counter > 1 && counter <= size))
+			{
+				counter--;
+			}
+			else if (key == switchKey2 && (counter >= 0 && counter < size))
+			{
+				counter++;
+			}
+			else if (key == conditionKey)
+			{
+				this->Condition(counter, colorSet);
+			}
+			else if (key == ENTER)
+			{
+				if (counter)
+				{
+					delete[] colorSet;
+					SetTextProperties(defaultColors, fontSize);
+					menuObject[counter - 1]->Execute();
+					return MENU_DONE;
+				}
+			}
+
+			colorSet = FillColorSet(defaultColors, size);
+
+			if (counter)
+			{
+				colorSet[counter - 1] = secondaryColors;
+			}
+			DrawDescription(menuObject[counter - 1]->description);
+		}
+		catch (...)
+		{
+			counter = 1;
+			continue;
+		}
+	}
+}
+
 void Menu::DrawDescription(std::string text)
 {
 	SetTextProperties(defaultColors, fontSize);
@@ -270,6 +351,8 @@ void Menu::DrawDescription(std::string text)
 }
 
 
+
+// --------------| Vertical menu |--------------
 
 vMenu::vMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : Menu(_size, _X, _Y, _menuObject, _descriptionField, _Graphics) {}
 
@@ -317,15 +400,15 @@ vMenu::vMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descripti
 		menuObject.push_back(_menuObject[i]);
 }
 
-BOOL vMenu::SpawnMenu(bool onlyDraw)
+int vMenu::SpawnMenu(bool onlyDraw)
 {
 	int counter = 1;
 	char key;
 
-	int * ColorSet = new int[size];
-	SecureZeroMemory(ColorSet, sizeof(ColorSet));
+	int * colorSet = new int[size];
+	SecureZeroMemory(colorSet, sizeof(colorSet));
 
-	ColorSet = FillColorSet(defaultColors, size);
+	colorSet = FillColorSet(defaultColors, size);
 
 	std::string hints[3] = { "<- Back", "Enter OK", "TAB Switch/Exit" };
 
@@ -337,66 +420,16 @@ BOOL vMenu::SpawnMenu(bool onlyDraw)
 		std::cout << hints[i];
 	}
 
-	while (true)
+	if (onlyDraw)
 	{
-		try
-		{
-			DrawMenu(ColorSet);
+		colorSet = FillColorSet(defaultColors, size);
+		DrawMenu(colorSet);
 
-			if (key == '\b' || onlyDraw == true)
-			{
-				DrawMenu(ColorSet);
-
-				delete[] ColorSet;
-				return FALSE;
-			}
-			else if (key == '	')
-			{
-				DrawMenu(ColorSet);
-
-				ColorSet[counter - 1] = defaultColors;
-				delete[] ColorSet;
-				return TRUE;
-			}
-
-
-			key = _getch();
-
-
-			if (key == 72 && (counter > 1 && counter <= size))
-			{
-				counter--;
-			}
-			else if (key == 80 && (counter >= 0 && counter < size))
-			{
-				counter++;
-			}
-
-			else if (key == '\r')
-			{
-				if (counter)
-				{
-					delete[] ColorSet;
-					SetTextProperties(defaultColors, fontSize);
-					menuObject[counter - 1]->Execute();
-					return FALSE;
-				}
-			}
-
-			ColorSet = FillColorSet(defaultColors, size);
-
-			if (counter)
-			{
-				ColorSet[counter - 1] = secondaryColors;
-			}
-			DrawDescription(menuObject[counter - 1]->description);
-		}
-		catch (...)
-		{
-			counter = 1;
-			continue;
-		}
+		delete[] colorSet;
+		return MENU_EXIT;
 	}
+
+	return MenuLoop(ARROW_UP, ARROW_DOWN, '\0', colorSet);
 }
 
 void vMenu::DrawMenu(int _ColorSet[])
@@ -410,6 +443,8 @@ void vMenu::DrawMenu(int _ColorSet[])
 }
 
 
+
+// --------------| Horizontal menu |--------------
 
 hMenu::hMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : Menu(_size, _X, _Y, _menuObject, _descriptionField, _Graphics) {}
 
@@ -457,7 +492,7 @@ hMenu::hMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descripti
 		menuObject.push_back(_menuObject[i]);
 }
 
-BOOL hMenu::SpawnMenu(bool onlyDraw)
+int hMenu::SpawnMenu(bool onlyDraw)
 {
 	int counter = 1;
 	char key;
@@ -488,65 +523,7 @@ BOOL hMenu::SpawnMenu(bool onlyDraw)
 
 	ColorSet = FillColorSet(defaultColors, size);
 
-	while (true)
-	{
-		try
-		{
-			DrawMenu(ColorSet);
-
-			if (key == '\b' || onlyDraw == true)
-			{
-				DrawMenu(ColorSet);
-
-				delete ColorSet;
-				return FALSE;
-			}
-			else if (key == '	')
-			{
-				DrawMenu(ColorSet);
-
-				ColorSet[counter - 1] = defaultColors;
-				delete ColorSet;
-				return TRUE;
-			}
-
-			key = _getch();
-
-
-			if (key == 75 && (counter > 1 && counter <= size))
-			{
-				counter--;
-			}
-			else if (key == 77 && (counter >= 0 && counter < size))
-			{
-				counter++;
-			}
-
-			else if (key == '\r')
-			{
-				if (counter)
-				{
-					delete[] ColorSet;
-					SetTextProperties(defaultColors, fontSize);
-					menuObject[counter - 1]->Execute();
-					return FALSE;
-				}
-			}
-
-			ColorSet = FillColorSet(defaultColors, size);
-
-			if (counter)
-			{
-				ColorSet[counter - 1] = secondaryColors;
-			}
-			DrawDescription(menuObject[counter - 1]->description);
-		}
-		catch (...)
-		{
-			counter = 1;
-			continue;
-		}
-	}
+	return MenuLoop(ARROW_LEFT, ARROW_RIGHT, '\0', ColorSet);
 }
 
 void hMenu::DrawMenu(int _ColorSet[])
@@ -561,9 +538,14 @@ void hMenu::DrawMenu(int _ColorSet[])
 
 
 
+// --------------| CheckBox menu |--------------
+
 cMenu::cMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _X, _Y, _menuObject, _descriptionField, _Graphics) {}
 
-cMenu::cMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _menuObject, _descriptionField, _Graphics) {}
+cMenu::cMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _menuObject, _descriptionField, _Graphics)
+{
+	selectedPoints = new PARAGRAPH*[size];
+}
 
 cMenu::cMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _menuObject, _Frame, _descriptionField, _Graphics) {}
 
@@ -582,83 +564,48 @@ PARAGRAPH** cMenu::SpawnMenu()
 		std::cout << hints[i];
 	}
 
-	PARAGRAPH** selectedPoints = new PARAGRAPH*[size];
+	selectedPoints = new PARAGRAPH*[size];
 	SecureZeroMemory(selectedPoints, sizeof(selectedPoints));
 
-	int * ColorSet = new int[size];
-	SecureZeroMemory(ColorSet, sizeof(ColorSet));
+	int * colorSet = new int[size];
+	SecureZeroMemory(colorSet, sizeof(colorSet));
 
-	ColorSet = FillColorSet(defaultColors, size);
+	colorSet = FillColorSet(defaultColors, size);
 
 
 	for (int j = 0; j < size; j++)
 	{
 		SetCursorPosition(X - 3, Y + j);
-		SetTextProperties(ColorSet[j], fontSize);
+		SetTextProperties(colorSet[j], fontSize);
 		std::cout << '[';
 		SetCursorPosition(X - 1, Y + j);
 		std::cout << ']';
 	}
 
-	while (true)
+	MenuLoop(ARROW_UP, ARROW_DOWN, SPACE, colorSet);
+	return selectedPoints;
+}
+
+void cMenu::Condition(int counter, int colorSet[])
+{
+	if (selectedPoints[counter - 1] == NULL)
 	{
-		try
-		{
-			DrawMenu(ColorSet);
-
-			key = _getch();
-
-
-			if (key == 72 && (counter > 1 && counter <= size))
-			{
-				counter--;
-			}
-			else if (key == 80 && (counter >= 0 && counter < size))
-			{
-				counter++;
-			}
-
-			else if (key == ' ')
-			{
-				if (selectedPoints[counter - 1] == NULL)
-				{
-					selectedPoints[counter - 1] = menuObject[counter - 1];
-					SetCursorPosition(X - 2, Y + (counter - 1));
-					SetTextProperties(defaultColors, fontSize);
-					std::cout << "*";
-				}
-				else if (selectedPoints[counter - 1] != NULL)
-				{
-					selectedPoints[counter - 1] = NULL;
-					SetCursorPosition(X - 2, Y + (counter - 1));
-					SetTextProperties(defaultColors, fontSize);
-					std::cout << " ";
-				}
-			}
-
-			else if (key == '\r')
-			{
-				delete[] ColorSet;
-				SetTextProperties(defaultColors, fontSize);
-				return selectedPoints;
-			}
-
-			ColorSet = FillColorSet(defaultColors, size);
-
-			if (counter)
-			{
-				ColorSet[counter - 1] = secondaryColors;
-			}
-			DrawDescription(menuObject[counter - 1]->description);
-		}
-		catch (...)
-		{
-			counter = 1;
-			continue;
-		}
+		selectedPoints[counter - 1] = menuObject[counter - 1];
+		SetCursorPosition(X - 2, Y + (counter - 1));
+		SetTextProperties(defaultColors, fontSize);
+		std::cout << "*";
+	}
+	else if (selectedPoints[counter - 1] != NULL)
+	{
+		selectedPoints[counter - 1] = NULL;
+		SetCursorPosition(X - 2, Y + (counter - 1));
+		SetTextProperties(defaultColors, fontSize);
+		std::cout << " ";
 	}
 }
 
+
+// --------------| Double (switch) menu |--------------
 
 sMenu::sMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _X, _Y, _menuObject, _descriptionField, _Graphics) {}
 
@@ -666,49 +613,68 @@ sMenu::sMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graph
 
 sMenu::sMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _menuObject, _Frame, _descriptionField, _Graphics) {}
 
-void sMenu::SpawnMenu(Menu* menu1, Menu* menu2)
+int sMenu::SpawnMenu(Menu* menu1, Menu* menu2)
 {
 	menu1->SpawnMenu(TRUE);
 	menu2->SpawnMenu(TRUE);
 
 
-	BOOL menu2State = FALSE;
-	BOOL menu1State = menu2->SpawnMenu(FALSE);
+	BOOL menu2State = MENU_SWITCH;
+	BOOL menu1State = MENU_EXIT;
 
 	while (true)
 	{
-		if (menu1State && !menu2State)
+		if (menu1State == MENU_SWITCH && menu2State == MENU_EXIT)
 		{
 			std::cout << " ";
-			menu1State = FALSE;
+			menu1State = MENU_EXIT;
 			menu2State = menu2->SpawnMenu(FALSE);
 		}
-		else if (menu2State && !menu1State)
+		else if (menu2State == MENU_SWITCH && menu1State == MENU_EXIT)
 		{
 			std::cout << " ";
-			menu2State = FALSE;
+			menu2State = MENU_EXIT;
 			menu1State = menu1->SpawnMenu(FALSE);
 		}
-		else if (!menu2State && !menu1State)
+		else if (menu2State == MENU_DONE || menu1State == MENU_DONE)
 		{
-			delete menu1, menu2;
-			break;
+			return MENU_DONE;
+		}
+		else if (menu1State == MENU_EXIT && menu2State == MENU_EXIT)
+		{
+			return MENU_EXIT;
 		}
 	}
 }
 
 
-dMenu::dMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : Menu(_size, _X, _Y, _menuObject, _descriptionField, _Graphics) {}
 
-dMenu::dMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics)
+// --------------| Frop-down menu |--------------
+
+dMenu::dMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], vMenu* _paragraphs[], Frame _descriptionField, Graphics _Graphics) : Menu(_size, _X, _Y, _menuObject, _descriptionField, _Graphics)
+{
+	std::string* paragraphNames = new std::string[_size];
+	paragraphs = _paragraphs;
+
+	for (int i = 0; i < _size; i++)
+		paragraphNames[i] = _menuObject[i]->paragraphName;
+
+	int lengthOfSpace = CalculatePosition(paragraphNames, _size);
+
+	for (int i = 0; i < lengthOfSpace; i++)
+		space += " ";
+}
+
+dMenu::dMenu(int _size, PARAGRAPH* _menuObject[], vMenu* _paragraphs[], Frame _descriptionField, Graphics _Graphics)
 {
 	fontSize = _Graphics.fontSize;
 
+	size = _size;
+	descriptionField = _descriptionField;
 	defaultColors = _Graphics.defaultColors;
 	secondaryColors = _Graphics.secondaryColors;
 
-	size = _size;
-	descriptionField = _descriptionField;
+	paragraphs = _paragraphs;
 
 	menuObject.reserve(size);
 
@@ -724,10 +690,16 @@ dMenu::dMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graph
 	X = _Graphics.windowWidth / _Graphics.fontSize - CalculatePosition(objNames, sizeof(objNames) / sizeof(*objNames));
 	Y = _Graphics.windowHeight / _Graphics.fontSize - CalculatePosition(objNames, sizeof(objNames) / sizeof(*objNames)) - 3;
 
+
+	int lengthOfSpace = CalculatePosition(objNames, _size);
+
+	for (int i = 0; i < lengthOfSpace; i++)
+		space += " ";
+
 	delete[] objNames;
 }
 
-dMenu::dMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics)
+dMenu::dMenu(int _size, PARAGRAPH* _menuObject[], vMenu* _paragraphs[], Frame _Frame, Frame _descriptionField, Graphics _Graphics)
 {
 	X = _Frame.Width / 4 + 1;
 	Y = _Frame.Height / 2;
@@ -738,17 +710,26 @@ dMenu::dMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descripti
 	defaultColors = _Graphics.defaultColors;
 	secondaryColors = _Graphics.secondaryColors;
 
+	paragraphs = _paragraphs;
+
 	menuObject.reserve(size);
 
 	for (int i = 0; i < size; i++)
 		menuObject.push_back(_menuObject[i]);
+
+	std::string* paragraphNames = new std::string[_size];
+
+	for (int i = 0; i < _size; i++)
+		paragraphNames[i] = _menuObject[i]->paragraphName;
+
+	int lengthOfSpace = CalculatePosition(paragraphNames, _size);
+
+	for (int i = 0; i < lengthOfSpace; i++)
+		space += " ";
 }
 
-BOOL dMenu::SpawnMenu(vMenu* paragraphs[], bool onlyDraw)
+int dMenu::SpawnMenu(bool onlyDraw)
 {
-	int counter = 1;
-	char key;
-
 	int * ColorSet = new int[size];
 	SecureZeroMemory(ColorSet, sizeof(ColorSet));
 
@@ -765,92 +746,31 @@ BOOL dMenu::SpawnMenu(vMenu* paragraphs[], bool onlyDraw)
 		std::cout << hints[i];
 	}
 
-	while (true)
+	return MenuLoop(ARROW_UP, ARROW_DOWN, ' ', ColorSet);
+}
+
+void dMenu::Condition(int counter, int colorSet[])
+{
+	colorSet = FillColorSet(defaultColors, size);
+	(paragraphs[counter - 1]->*&dMenu::Y) += counter;
+	(paragraphs[counter - 1]->*&dMenu::X) += 1;
+
+	Y += (paragraphs[counter - 1]->*&dMenu::size);
+	DrawMenu(colorSet);
+
+	paragraphs[counter - 1]->SpawnMenu();
+
+	for (int i = 0; i < size; i++)
 	{
-		try
-		{
-			DrawMenu(ColorSet);
-
-			if (key == '\b' || onlyDraw == TRUE)
-			{
-				DrawMenu(ColorSet);
-				delete[] ColorSet;
-				return FALSE;
-			}
-			else if (key == '	')
-			{
-				DrawMenu(ColorSet);
-
-				ColorSet[counter - 1] = defaultColors;
-				delete[] ColorSet;
-				return TRUE;
-			}
-
-
-			key = _getch();
-
-
-			if (key == 72 && (counter > 1 && counter <= size))
-			{
-				counter--;
-			}
-			else if (key == 80 && (counter >= 0 && counter < size))
-			{
-				counter++;
-			}
-
-			else if (key == ' ')
-			{
-				if (counter)
-				{
-					SetTextProperties(defaultColors, fontSize);
-					(paragraphs[counter - 1]->*&dMenu::Y) += counter;
-					(paragraphs[counter - 1]->*&dMenu::X) += 1;
-
-					Y += (paragraphs[counter - 1]->*&dMenu::size);
-					DrawMenu(ColorSet);
-
-					paragraphs[counter - 1]->SpawnMenu();
-
-					for (int i = 0; i < size; i++)
-					{
-						SetCursorPosition(X, Y + i);
-						std::cout << "        ";
-					}
-
-					(paragraphs[counter - 1]->*&dMenu::Y) -= counter;
-					(paragraphs[counter - 1]->*&dMenu::X) -= 1;
-
-					Y -= (paragraphs[counter - 1]->*&dMenu::size);
-					DrawMenu(ColorSet);
-				}
-			}
-
-			else if (key == '\r')
-			{
-				if (counter)
-				{
-					delete[] ColorSet;
-					SetTextProperties(defaultColors, fontSize);
-					menuObject[counter - 1]->Execute();
-					return FALSE;
-				}
-			}
-
-			ColorSet = FillColorSet(defaultColors, size);
-
-			if (counter)
-			{
-				ColorSet[counter - 1] = secondaryColors;
-			}
-			DrawDescription(menuObject[counter - 1]->description);
-		}
-		catch (...)
-		{
-			counter = 1;
-			continue;
-		}
+		SetCursorPosition(X, Y + i);
+		std::cout << space << " ";
 	}
+
+	(paragraphs[counter - 1]->*&dMenu::Y) -= counter;
+	(paragraphs[counter - 1]->*&dMenu::X) -= 1;
+
+	Y -= (paragraphs[counter - 1]->*&dMenu::size);
+	DrawMenu(colorSet);
 }
 
 void dMenu::DrawMenu(int _ColorSet[])
@@ -864,7 +784,14 @@ void dMenu::DrawMenu(int _ColorSet[])
 }
 
 
-
+// --------------| Dialog box spawner |--------------
+MsgBox::MsgBox(std::string _description, Graphics _Graphics)
+{
+	description = _description;
+	lfontSize = _Graphics.fontSize;
+	width = _Graphics.windowWidth;
+	height = _Graphics.windowHeight;
+}
 
 BOOL MsgBox::Message(MSG_BOX_TYPE container)
 {

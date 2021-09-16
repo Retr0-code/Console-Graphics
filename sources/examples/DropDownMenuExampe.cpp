@@ -119,15 +119,16 @@ int main()
 
 	// ----------- Initialize Menus ----------- //
 
-	dMenu* menuD = new dMenu(4, objects, frame1, frame2, window);
 	vMenu* menu1 = new vMenu(4, objects, frame1, frame2, window);
 	vMenu* menu2 = new vMenu(4, objects, frame1, frame2, window);
 	vMenu* menu3 = new vMenu(4, objects, frame1, frame2, window);
 	vMenu* menu4 = new vMenu(4, objects, frame1, frame2, window);
 
 	vMenu* menus[4] = { menu1, menu2, menu3, menu4 };
+	
+	dMenu* menuD = new dMenu(4, objects, menus, frame1, frame2, window);
 
-	menuD->SpawnMenu(menus);
+	menuD->SpawnMenu();
 
 	// Removing paragraphs objects to escape memory leak
 	delete fstPar, sndPar, trdPar, frtPar, objects;

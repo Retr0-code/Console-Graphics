@@ -1,5 +1,5 @@
 #pragma once
-#include "colors.h"
+#include "setup.h"
 
 #include <map>
 #include <vector>
@@ -7,6 +7,7 @@
 #include <conio.h>
 #include <iostream>
 #include <windows.h>
+#include <functional>
 
 /** \struct frameSegments
  *  \brief This structure used to pass segments of a frame as arguments (leftTopCorner, rightTopCorner, leftDownCorner, rightDownCorner, Horizontal, Vertical).
@@ -297,7 +298,8 @@ protected:
 
 	Menu() = default;
 
-	
+	int MenuLoop(int switchKey1, int switchKey2, char conditionKey, int colorSet[]);
+
 	/** \fn DrawDescription(std::string text)
 	 *	\brief This method displays description for element of menu. (is inaccessacle from outside the class)
 	 *
@@ -307,8 +309,10 @@ protected:
 
 	virtual void DrawMenu(int _ColorSet[]) = 0;
 
+	virtual void Condition(int counter, int colorSet[]) = 0;
+
 public:
-	virtual BOOL SpawnMenu(bool onlyDraw = false) = 0;
+	virtual int SpawnMenu(bool onlyDraw = false) = 0;
 };
 
 
@@ -348,9 +352,11 @@ public:
 	 */
 	vMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
 
-	BOOL SpawnMenu(bool onlyDraw = false);
+	int SpawnMenu(bool onlyDraw = false);
+
 
 protected:
+	virtual void Condition(int counter, int colorSet[]) override {}
 
 	void DrawMenu(int _ColorSet[]) override;
 };
@@ -398,9 +404,10 @@ public:
 	 *	\param onlyDraw		Gets boolean value which sets flag to only draw menu.
 	 *	\return				TRUE if pressed TAB, and FALSE if pressed BACK or flag 'onlyDraw' is TRUE.
 	 */
-	BOOL SpawnMenu(bool onlyDraw = false);
+	int SpawnMenu(bool onlyDraw = false);
 
 private:
+	void Condition(int counter, int colorSet[]) override {}
 
 	void DrawMenu(int _ColorSet[]) override;
 };
@@ -448,6 +455,11 @@ public:
 	 *	\return Massive of objects that was chosen.
 	 */
 	PARAGRAPH** SpawnMenu();
+
+private:
+	PARAGRAPH** selectedPoints;
+
+	void Condition(int counter, int colorSet[]) override;
 };
 
 
@@ -497,7 +509,10 @@ public:
  *
  *	\example SwitchMenu menu.SwitchMenu(menu1, menu2, &Menu::Vertical, &Menu::Horizontal);
  */
-	void SpawnMenu(Menu* menu1, Menu* menu2);
+	int SpawnMenu(Menu* menu1, Menu* menu2);
+
+private:
+	void Condition(int counter, int colorSet[]) override {}
 };
 
 
@@ -514,7 +529,7 @@ public:
 	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 	 *	\param _descriptionField	Contains Frame object where description will be displayed.
 	 */
-	dMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+	dMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], vMenu* _paragraphs[], Frame _descriptionField, Graphics _Graphics);
 
 	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
 	 *	\brief This constructor creates menu in center of window.
@@ -524,7 +539,7 @@ public:
 	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 	 *	\param _descriptionField	Contains Frame object where description will be displayed.
 	 */
-	dMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
+	dMenu(int _size, PARAGRAPH* _menuObject[], vMenu* _paragraphs[], Frame _descriptionField, Graphics _Graphics);
 
 	/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
 	 *	\brief This constructor creates menu in center of Frame.
@@ -535,17 +550,18 @@ public:
 	 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 	 *	\param _descriptionField	Contains Frame object where description will be displayed.
 	 */
-	dMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
+	dMenu(int _size, PARAGRAPH* _menuObject[], vMenu* _paragraphs[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
 
-	BOOL SpawnMenu(vMenu* paragraphs[], bool onlyDraw = false);
-
-	BOOL SpawnMenu(bool onlyDraw = false) override
-	{
-		return FALSE;
-	}
+	int SpawnMenu(bool onlyDraw = false) override;
 
 private:
+	vMenu** paragraphs;
+
+	void Condition(int counter, int colorSet[]) override;
+	
 	void DrawMenu(int _ColorSet[]);
+
+	std::string space;
 };
 
 
@@ -569,13 +585,7 @@ public:
 	 *	\param _description		Gets description that will be displayed in dialog box.
 	 *	\param _Graphics		Gets Graphics object to get basic settings.
 	 */
-	MsgBox(std::string _description, Graphics _Graphics)
-	{
-		description = _description;
-		lfontSize = _Graphics.fontSize;
-		width = _Graphics.windowWidth;
-		height = _Graphics.windowHeight;
-	}
+	MsgBox(std::string _description, Graphics _Graphics);
 
 	/** \fn Message(MSG_BOX_TYPE container)
 	 *	\brief This method displays dialog (message) box.

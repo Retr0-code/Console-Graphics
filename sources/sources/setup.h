@@ -33,3 +33,22 @@
 #define BG_VIOLET	208
 #define BG_YELLOW	224
 #define BG_WHITE	240
+
+enum MenuReturnValues : int
+{
+	MENU_DONE = -1,
+	MENU_SWITCH = 0,
+	MENU_EXIT = 1
+};
+
+enum keys
+{
+	ARROW_UP = 72,
+	ARROW_DOWN = 80,
+	ARROW_LEFT = 75,
+	ARROW_RIGHT = 77,
+	SPACE = ' ',
+	ENTER = '\r',
+	BACKSPACE = '\b',
+	TAB	= '\t'
+};
