@@ -1,5 +1,5 @@
 # Pseudo-Graphics
-[![Last Release](https://img.shields.io/static/v1?label=Download&message=Last%20release&color=green)](https://github.com/Retr0-code/Console-Graphics/releases/tag/v0.3)
+[![Last Release](https://img.shields.io/static/v1?label=Download&message=Last%20release&color=green)](https://github.com/Retr0-code/Console-Graphics/releases/tag/v0.6)
 
 This library was created to speed up the process of programming windows applications in C++ using console (pseudo) graphics. The library is designed for beginners like me. The functionality will be updated depending on the time and ideas.
 
