@@ -1,3 +1,7 @@
+#include <conio.h>
+#include <iostream>
+#include <Windows.h>
+
 #include "../sources/Semi-Graphics.h"
 
 #define FONT_SIZE 36
@@ -6,25 +10,25 @@
 
 void A()
 {
-	cls(GetStdHandle(STD_OUTPUT_HANDLE));
+	pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
 	std::cout << "\n Yep ";
 }
 
 void B()
 {
-	cls(GetStdHandle(STD_OUTPUT_HANDLE));
+	pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
 	std::cout << "\n Not that ";
 }
 
 void C()
 {
-	cls(GetStdHandle(STD_OUTPUT_HANDLE));
+	pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
 	std::cout << "\n Not that one ";
 }
 
 void D()
 {
-	cls(GetStdHandle(STD_OUTPUT_HANDLE));
+	pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
 	std::cout << "\n That a lot more ";
 }
 
@@ -32,7 +36,7 @@ void D()
 
 // ---------- Child classes ------------ //
 
-class firstParagraph : public PARAGRAPH
+class firstParagraph : public pgi::PARAGRAPH
 {
 public:
 	firstParagraph(std::string _paragraphName, std::string _description) : PARAGRAPH(_paragraphName, _description)
@@ -47,7 +51,7 @@ public:
 	}
 };
 
-class secondParagraph : public PARAGRAPH
+class secondParagraph : public pgi::PARAGRAPH
 {
 public:
 	secondParagraph(std::string _paragraphName, std::string _description) : PARAGRAPH(_paragraphName, _description)
@@ -62,7 +66,7 @@ public:
 	}
 };
 
-class thirdParagraph : public PARAGRAPH
+class thirdParagraph : public pgi::PARAGRAPH
 {
 public:
 	thirdParagraph(std::string _paragraphName, std::string _description) : PARAGRAPH(_paragraphName, _description)
@@ -77,7 +81,7 @@ public:
 	}
 };
 
-class fourthParagraph : public PARAGRAPH
+class fourthParagraph : public pgi::PARAGRAPH
 {
 public:
 	fourthParagraph(std::string _paragraphName, std::string _description) : PARAGRAPH(_paragraphName, _description)
@@ -92,7 +96,7 @@ public:
 	}
 };
 
-class fifthParagraph : public PARAGRAPH
+class fifthParagraph : public pgi::PARAGRAPH
 {
 public:
 	fifthParagraph(std::string _paragraphName, std::string _description) : PARAGRAPH(_paragraphName, _description)
@@ -103,19 +107,17 @@ public:
 
 	void Execute() override
 	{
-		cls(GetStdHandle(STD_OUTPUT_HANDLE));
+		pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
 		std::cout << "HHMMMMMMMMMMMMMMMMMMMMMMMM\n";
 	}
 };
 
 int main()
 {
-	Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE);
+	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE);
 
-	//window.makeFrame(0, 0, WINDOW_WIDTH / 10 - calculatePercent((WINDOW_WIDTH / 10), 11), WINDOW_HEIGHT / 10 - calculatePercent(WINDOW_HEIGHT / 10, 80) );
-
-	Frame frame1(0, 12, WINDOW_WIDTH / (48 / 2) + 14, 6, { '+', NULL, NULL, NULL, '-', '|' });
-	Frame frame2(0, 1, WINDOW_WIDTH / (48 / 2) + 14, 10);
+	pgi::Frame frame1(0, 12, WINDOW_WIDTH / (48 / 2) + 14, 6, { '+', NULL, NULL, NULL, '-', '|' });
+	pgi::Frame frame2(0, 1, WINDOW_WIDTH / (48 / 2) + 14, 10);
 
 	frame1.SpawnFrame("");
 	frame2.SpawnFrame("");
@@ -130,11 +132,11 @@ int main()
 	thirdParagraph* trdPar = new thirdParagraph(menuNames[2], menuDescriptions[2]);
 	fourthParagraph* frtPar = new fourthParagraph(menuNames[3], menuDescriptions[3]);
 
-	PARAGRAPH* objects[4] = { fstPar, sndPar, trdPar, frtPar };
+	pgi::PARAGRAPH* objects[4] = { fstPar, sndPar, trdPar, frtPar };
 
 	// ----------- Initialize Menu ----------- //
 
-	hMenu menu(4, objects, frame1, frame2, window);
+	pgi::hMenu menu(4, objects, frame1, frame2, window);
 
 	// Creates vertical menu orientation
 	menu.SpawnMenu();

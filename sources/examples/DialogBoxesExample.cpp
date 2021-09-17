@@ -1,3 +1,7 @@
+#include <conio.h>
+#include <iostream>
+#include <Windows.h>
+
 #include "../sources/Semi-Graphics.h"
 
 #define FONT_SIZE 36
@@ -7,10 +11,10 @@
 
 int main()
 {
-	Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, { BG_BLACK, FG_WHITE }, { BG_ORANGE, FG_BLACK }, FONT_SIZE);
+	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, { BG_BLACK, FG_WHITE }, { BG_ORANGE, FG_BLACK }, FONT_SIZE);
 
 	// ----------- Initialize MessageBox ----------- //
-	MsgBox Dialog("TEST", window);
+	pgi::MsgBox Dialog("TEST", window);
 
 	// Default themes
 	//int value = Dialog.Message(BOX_INFO);
@@ -23,13 +27,13 @@ int main()
 	
 	if (value)
 	{
-		cls(GetStdHandle(STD_OUTPUT_HANDLE));
+		pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
 		std::cout << value << std::endl;
 	}
 	else
 		return 0;
 
-	system("pause");
+	_getch();
 
 	return 0;
 }
