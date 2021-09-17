@@ -12,7 +12,6 @@ This library was created to speed up the process of programming windows applicat
   - [x] Swithing between multiple menus 
   - [x] Dropdown menu
   - [ ] Tables
-  - [ ] Text redactor
 
 <br>
 
