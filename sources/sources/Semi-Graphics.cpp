@@ -156,8 +156,31 @@ namespace pgi
 		return ColorSet;
 	}
 
+	std::string* Graphics::MaskDescriptions(std::string descriptions[], int size)
+	{
+		int maxLength = CalculateMaxLength(descriptions, size);
+
+		for (int i = 0; i < size; i++)
+		{
+			for (int j = 0; j < maxLength - descriptions[i].length(); j++)
+			{
+				descriptions[i] += " ";
+			}
+		}
+		return descriptions;
+	}
+
 
 	// --------------| Line class |--------------
+
+	Line::Line(int X, int Y, int _lineLength, char _lineSegment)
+	{
+		lineStartX = X;
+		lineStartY = Y;
+		lineLength = _lineLength;
+		lineSegment = _lineSegment;
+	};
+
 
 	void vLine::DrawLine()
 	{
@@ -306,18 +329,25 @@ namespace pgi
 
 	Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics)
 	{
-		X = _X;
-		Y = _Y;
+		position.X = _X;
+		position.Y = _Y;
 		fontSize = _Graphics.fontSize;
 		size = _size;
-		descriptionField = _descriptionField;
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
+		descriptionField = _descriptionField;
 
-		menuObject.reserve(size);
+		descriptions = new std::string[size];
 
 		for (int i = 0; i < size; i++)
-			menuObject.push_back(_menuObject[i]);
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+
+		menuObject = new PARAGRAPH*[size];
+
+		for (int i = 0; i < size; i++)
+			menuObject[i] = _menuObject[i];
 	}
 
 	int Menu::MenuLoop(int switchKey1, int switchKey2, char conditionKey, int colorSet[])
@@ -330,6 +360,7 @@ namespace pgi
 			try
 			{
 				DrawMenu(colorSet);
+				DrawDescription(descriptions[counter - 1]);
 
 				if (key == BACKSPACE)
 				{
@@ -362,7 +393,10 @@ namespace pgi
 				}
 				else if (key == conditionKey)
 				{
-					this->Condition(counter, colorSet);
+					if (this->Condition(counter, colorSet))
+					{
+						return MENU_DONE;
+					}
 				}
 				else if (key == ENTER)
 				{
@@ -376,12 +410,10 @@ namespace pgi
 				}
 
 				colorSet = FillColorSet(defaultColors, size);
-
 				if (counter)
 				{
 					colorSet[counter - 1] = secondaryColors;
 				}
-				DrawDescription(menuObject[counter - 1]->description);
 			}
 			catch (...)
 			{
@@ -397,6 +429,22 @@ namespace pgi
 		SetCursorPosition(descriptionField.GetOriginX() + 3, descriptionField.GetOriginY() + 3);
 
 		std::cout << text;
+	}
+
+	coordinates Menu::CalculatePositionInFrame(int frameWidth, int frameHeight)
+	{
+		return {
+			frameWidth / 4 + 1,
+			frameHeight / 2
+		};
+	}
+
+	coordinates Menu::CalculateWindowCenter(int windowWidth, int windowHeight, std::string objNames[])
+	{
+		return {
+			windowWidth / fontSize - CalculateMaxLength(objNames, sizeof(objNames) / sizeof(*objNames)),
+			windowHeight / fontSize - CalculateMaxLength(objNames, sizeof(objNames) / sizeof(*objNames)) - 3
+		};
 	}
 
 
@@ -415,10 +463,15 @@ namespace pgi
 		size = _size;
 		descriptionField = _descriptionField;
 
-		menuObject.reserve(size);
-
 		std::string* objNames = new std::string[size];
 		SecureZeroMemory(objNames, sizeof(objNames));
+
+		descriptions = new std::string[size];		
+		for (int i = 0; i < size; i++)
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+		menuObject = new PARAGRAPH*[size];
 
 		for (int i = 0; i < size; i++)
 		{
@@ -426,16 +479,14 @@ namespace pgi
 			objNames[i] = _menuObject[0]->paragraphName;
 		}
 
-		X = _Graphics.windowWidth / _Graphics.fontSize - CalculateMaxLength(objNames, sizeof(objNames) / sizeof(*objNames));
-		Y = _Graphics.windowHeight / _Graphics.fontSize - CalculateMaxLength(objNames, sizeof(objNames) / sizeof(*objNames)) - 3;
-
+		position = CalculateWindowCenter(_Graphics.windowWidth, _Graphics.windowHeight, objNames);
+		
 		delete[] objNames;
 	}
 
 	vMenu::vMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics)
 	{
-		X = _Frame.GetWidth() / 4 + 1;
-		Y = _Frame.GetHeight() / 2;
+		position = CalculatePositionInFrame(_Frame.GetWidth(), _Frame.GetHeight());
 
 		fontSize = _Graphics.fontSize;
 		size = _size;
@@ -443,10 +494,17 @@ namespace pgi
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
 
-		menuObject.reserve(size);
+		descriptions = new std::string[size];
 
 		for (int i = 0; i < size; i++)
-			menuObject.push_back(_menuObject[i]);
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+
+		menuObject = new PARAGRAPH*[size];
+
+		for (int i = 0; i < size; i++)
+			menuObject[i] = _menuObject[i];
 	}
 
 	int vMenu::SpawnMenu(bool onlyDraw)
@@ -471,11 +529,12 @@ namespace pgi
 	{
 		for (int j = 0; j < size; j++)
 		{
-			SetCursorPosition(X, Y + j);
+			SetCursorPosition(position.X, position.Y + j);
 			SetTextProperties(_ColorSet[j], fontSize);
 			std::cout << menuObject[j]->paragraphName;
 		}
 	}
+
 
 
 
@@ -493,10 +552,16 @@ namespace pgi
 		size = _size;
 		descriptionField = _descriptionField;
 
-		menuObject.reserve(size);
+		descriptions = new std::string[size];
+		for (int i = 0; i < size; i++)
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
 
 		std::string* objNames = new std::string[size];
 		SecureZeroMemory(objNames, sizeof(objNames));
+
+		menuObject = new PARAGRAPH*[size];
 
 		for (int i = 0; i < size; i++)
 		{
@@ -504,42 +569,36 @@ namespace pgi
 			objNames[i] = _menuObject[0]->paragraphName;
 		}
 
-		X = _Graphics.windowWidth / _Graphics.fontSize - CalculateMaxLength(objNames, sizeof(objNames) / sizeof(*objNames));
-		Y = _Graphics.windowHeight / _Graphics.fontSize - CalculateMaxLength(objNames, sizeof(objNames) / sizeof(*objNames)) - 3;
+		position = CalculateWindowCenter(_Graphics.windowWidth, _Graphics.windowHeight, objNames);
 
 		delete[] objNames;
 	}
 
 	hMenu::hMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics)
 	{
-		X = _Frame.GetWidth() / 4 + 1;
-		Y = _Frame.GetHeight() / 2;
-
 		fontSize = _Graphics.fontSize;
 		size = _size;
 		descriptionField = _descriptionField;
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
 
-		menuObject.reserve(size);
+		position = CalculatePositionInFrame(_Frame.GetWidth(), _Frame.GetHeight());
+		position.Y += _Frame.GetOriginY();
+		
+		descriptions = new std::string[size];
+		for (int i = 0; i < size; i++)
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+
+		menuObject = new PARAGRAPH*[size];
 
 		for (int i = 0; i < size; i++)
-			menuObject.push_back(_menuObject[i]);
+			menuObject[i] = _menuObject[i];
 	}
 
 	int hMenu::SpawnMenu(bool onlyDraw)
 	{
-		if (size % 2 != 0)
-		{
-			X = X / size * 2;
-			Y = Y - size / 6;
-		}
-		else
-		{
-			X = X / (size / 2) - 2;
-			Y = Y - size / 6;
-		}
-
 		int * colorSet = new int[size];
 		SecureZeroMemory(colorSet, sizeof(colorSet));
 
@@ -561,28 +620,70 @@ namespace pgi
 	{
 		for (int j = 0; j < size; j++)
 		{
-			SetCursorPosition(X + X * j, Y);
+			SetCursorPosition(position.X + position.X * j, position.Y);
 			SetTextProperties(_ColorSet[j], fontSize);
 			std::cout << menuObject[j]->paragraphName;
 		}
 	}
 
+	coordinates hMenu::CalculatePositionInFrame(int frameWidth, int frameHeight)
+	{
+		int X = frameWidth / (size + 1);
+		int Y = frameHeight / 2;
+
+		return { X, Y };
+	}
+
+	coordinates hMenu::CalculateWindowCenter(int windowWidth, int windowHeight, std::string objNames[])
+	{
+		if (size % 2 == 0)
+		{
+			return {
+			(windowWidth / fontSize * 2) / (size + size / 2),
+			(windowHeight / fontSize) / 2 + 3
+			};
+		}
+		else
+		{
+			return {
+				(windowWidth / fontSize * 2) / (size + 1),
+				(windowHeight / fontSize) / 2 + 3
+			};
+		}
+	}
 
 
 	// --------------| CheckBox menu |--------------
 
 	cMenu::cMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _X, _Y, _menuObject, _descriptionField, _Graphics)
 	{
+		for (int i = 0; i < size; i++)
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+
 		selectedPoints = new PARAGRAPH*[size];
 	}
 
 	cMenu::cMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _menuObject, _descriptionField, _Graphics)
 	{
+		descriptions = new std::string[size];
+		for (int i = 0; i < size; i++)
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+
 		selectedPoints = new PARAGRAPH*[size];
 	}
 
 	cMenu::cMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _menuObject, _Frame, _descriptionField, _Graphics)
 	{
+		descriptions = new std::string[size];
+		for (int i = 0; i < size; i++)
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+
 		selectedPoints = new PARAGRAPH*[size];
 	}
 
@@ -599,10 +700,10 @@ namespace pgi
 
 		for (int j = 0; j < size; j++)
 		{
-			SetCursorPosition(X - 3, Y + j);
+			SetCursorPosition(position.X - 3, position.Y + j);
 			SetTextProperties(colorSet[j], fontSize);
 			std::cout << '[';
-			SetCursorPosition(X - 1, Y + j);
+			SetCursorPosition(position.X - 1, position.Y + j);
 			std::cout << ']';
 		}
 
@@ -610,22 +711,23 @@ namespace pgi
 		return selectedPoints;
 	}
 
-	void cMenu::Condition(int counter, int colorSet[])
+	bool cMenu::Condition(int counter, int colorSet[])
 	{
 		if (selectedPoints[counter - 1] == NULL)
 		{
 			selectedPoints[counter - 1] = menuObject[counter - 1];
-			SetCursorPosition(X - 2, Y + (counter - 1));
+			SetCursorPosition(position.X - 2, position.Y + (counter - 1));
 			SetTextProperties(defaultColors, fontSize);
 			std::cout << "*";
 		}
 		else if (selectedPoints[counter - 1] != NULL)
 		{
 			selectedPoints[counter - 1] = NULL;
-			SetCursorPosition(X - 2, Y + (counter - 1));
+			SetCursorPosition(position.X - 2, position.Y + (counter - 1));
 			SetTextProperties(defaultColors, fontSize);
 			std::cout << " ";
 		}
+		return false;
 	}
 
 
@@ -680,6 +782,12 @@ namespace pgi
 		std::string* paragraphNames = new std::string[_size];
 		paragraphs = _paragraphs;
 
+		descriptions = new std::string[size];
+		for (int i = 0; i < size; i++)
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+
 		for (int i = 0; i < _size; i++)
 			paragraphNames[i] = _menuObject[i]->paragraphName;
 
@@ -700,7 +808,13 @@ namespace pgi
 
 		paragraphs = _paragraphs;
 
-		menuObject.reserve(size);
+		descriptions = new std::string[size];
+		for (int i = 0; i < size; i++)
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+
+		menuObject = new PARAGRAPH*[size];
 
 		std::string* objNames = new std::string[size];
 		SecureZeroMemory(objNames, sizeof(objNames));
@@ -711,8 +825,7 @@ namespace pgi
 			objNames[i] = _menuObject[0]->paragraphName;
 		}
 
-		X = _Graphics.windowWidth / _Graphics.fontSize - CalculateMaxLength(objNames, sizeof(objNames) / sizeof(*objNames));
-		Y = _Graphics.windowHeight / _Graphics.fontSize - CalculateMaxLength(objNames, sizeof(objNames) / sizeof(*objNames)) - 3;
+		position = CalculateWindowCenter(_Graphics.windowWidth, _Graphics.windowHeight, objNames);
 
 
 		int lengthOfSpace = CalculateMaxLength(objNames, _size);
@@ -725,21 +838,25 @@ namespace pgi
 
 	dMenu::dMenu(int _size, PARAGRAPH* _menuObject[], vMenu* _paragraphs[], Frame _Frame, Frame _descriptionField, Graphics _Graphics)
 	{
-		X = _Frame.GetWidth() / 4 + 1;
-		Y = _Frame.GetHeight() / 2;
-
 		fontSize = _Graphics.fontSize;
 		size = _size;
 		descriptionField = _descriptionField;
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
+		position = CalculatePositionInFrame(_Frame.GetWidth(), _Frame.GetHeight());
 
 		paragraphs = _paragraphs;
 
-		menuObject.reserve(size);
+		descriptions = new std::string[size];
+		for (int i = 0; i < size; i++)
+			descriptions[i] = _menuObject[i]->description;
+
+		descriptions = MaskDescriptions(descriptions, size);
+
+		menuObject = new PARAGRAPH*[size];
 
 		for (int i = 0; i < size; i++)
-			menuObject.push_back(_menuObject[i]);
+			menuObject[i] = _menuObject[i];
 
 		std::string* paragraphNames = new std::string[_size];
 
@@ -770,50 +887,56 @@ namespace pgi
 		return MenuLoop(ARROW_UP, ARROW_DOWN, ' ', colorSet);
 	}
 
-	void dMenu::Condition(int counter, int colorSet[])
+	bool dMenu::Condition(int counter, int colorSet[])
 	{
 		colorSet = FillColorSet(defaultColors, size);
-		(paragraphs[counter - 1]->*&dMenu::Y) += counter;
-		(paragraphs[counter - 1]->*&dMenu::X) += 1;
+		(paragraphs[counter - 1]->*&dMenu::position).Y += counter;
+		(paragraphs[counter - 1]->*&dMenu::position).X += 1;
 
-		Y += (paragraphs[counter - 1]->*&dMenu::size);
+		position.Y += (paragraphs[counter - 1]->*&dMenu::size);
 		DrawMenu(colorSet);
 
 		for (int j = 0; j < size; j++)
 		{
-			SetCursorPosition(X, (paragraphs[counter - 1]->*&dMenu::Y) + j);
+			SetCursorPosition(position.X, (paragraphs[counter - 1]->*&dMenu::position).Y + j);
 			SetTextProperties(colorSet[j], fontSize);
 			std::cout << " " << space << " ";
 		}
 
-		paragraphs[counter - 1]->SpawnMenu();
-
-		for (int i = 0; i < size; i++)
+		if (paragraphs[counter - 1]->SpawnMenu() == MENU_DONE)
 		{
-			SetCursorPosition(X, Y + i);
-			std::cout << space << " ";
+			return true;
 		}
-
-		(paragraphs[counter - 1]->*&dMenu::Y) -= counter;
-		(paragraphs[counter - 1]->*&dMenu::X) -= 1;
-
-		Y -= (paragraphs[counter - 1]->*&dMenu::size);
-
-		for (int j = 0; j < size; j++)
+		else
 		{
-			SetCursorPosition(X, Y + j);
-			SetTextProperties(colorSet[j], fontSize);
-			std::cout << " " << space << " ";
-		}
+			for (int i = 0; i < size; i++)
+			{
+				SetCursorPosition(position.X, position.Y + i);
+				std::cout << space << " ";
+			}
 
-		DrawMenu(colorSet);
+			(paragraphs[counter - 1]->*&dMenu::position).Y -= counter;
+			(paragraphs[counter - 1]->*&dMenu::position).X -= 1;
+
+			position.Y -= (paragraphs[counter - 1]->*&dMenu::size);
+
+			for (int j = 0; j < size; j++)
+			{
+				SetCursorPosition(position.X, position.Y + j);
+				SetTextProperties(colorSet[j], fontSize);
+				std::cout << " " << space << " ";
+			}
+
+			DrawMenu(colorSet);
+			return false;
+		}
 	}
 
 	void dMenu::DrawMenu(int _ColorSet[])
 	{
 		for (int j = 0; j < size; j++)
 		{
-			SetCursorPosition(X, Y + j);
+			SetCursorPosition(position.X, position.Y + j);
 			SetTextProperties(_ColorSet[j], fontSize);
 			std::cout << menuObject[j]->paragraphName;
 		}
@@ -867,20 +990,20 @@ namespace pgi
 
 				key = _getch();
 
-				if (key == 77 && state == TRUE)
+				if (key == ARROW_RIGHT && state == TRUE)
 				{
 					ColorSet[state] = container.selectColor;
 					ColorSet[state - 1] = container.deselectColor;
 					state = FALSE;
 				}
-				else if (key == 75 && state == FALSE)
+				else if (key == ARROW_LEFT && state == FALSE)
 				{
 					ColorSet[state] = container.deselectColor;
 					ColorSet[state - 1] = container.selectColor;
 					state = TRUE;
 				}
 
-				else if (key == '\r')
+				else if (key == ENTER)
 				{
 
 					SetTextProperties(defaultColors, lfontSize);

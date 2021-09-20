@@ -117,7 +117,6 @@ int main()
 {
 	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, { BG_BLACK, FG_WHITE }, { BG_ORANGE, FG_BLACK }, FONT_SIZE);
 
-	//window.makeFrame(0, 0, WINDOW_WIDTH / 10 - calculatePercent((WINDOW_WIDTH / 10), 11), WINDOW_HEIGHT / 10 - calculatePercent(WINDOW_HEIGHT / 10, 80) );
 	pgi::Frame frame(0, 1, (WINDOW_WIDTH / FONT_SIZE) * 2 - 3, WINDOW_HEIGHT / (FONT_SIZE * 2) - 2);
 	frame.SpawnFrame("");
 
@@ -135,8 +134,6 @@ int main()
 	pgi::PARAGRAPH* objects[5] = { fstPar, sndPar, trdPar, frtPar, ftfPar };
 
 	// ----------- Initialize Menu ----------- //
-
-	//Menu menu(4, 5, 20, objects, window, frame);
 	pgi::hMenu menu(5, objects, frame, window);
 
 	// Creates horizontal menu orientation

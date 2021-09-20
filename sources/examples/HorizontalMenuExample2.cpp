@@ -96,21 +96,6 @@ public:
 	}
 };
 
-class fifthParagraph : public pgi::PARAGRAPH
-{
-public:
-	fifthParagraph(std::string _paragraphName, std::string _description) : PARAGRAPH(_paragraphName, _description)
-	{
-		paragraphName = _paragraphName;
-		description = _description;
-	}
-
-	void Execute() override
-	{
-		pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
-		std::cout << "HHMMMMMMMMMMMMMMMMMMMMMMMM\n";
-	}
-};
 
 int main()
 {
@@ -123,7 +108,7 @@ int main()
 	frame2.SpawnFrame("");
 
 	std::string menuNames[4] = { "1 MENU" , "2 HELP", "3 TEST", "4 EXIT" };
-	std::string menuDescriptions[4] = { "Displays this menu message", "Displays help message     ", "Displays message with test", "Shuts down the program    " };
+	std::string menuDescriptions[4] = { "Displays this menu message", "Displays help message", "Displays message with test", "Shuts down the program" };
 
 	// ----------- Creating paragraphs objects ------------- //
 

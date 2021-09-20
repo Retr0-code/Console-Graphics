@@ -98,6 +98,13 @@ typedef struct
 	int background;
 } color;
 
+
+typedef struct
+{
+	int X;
+	int Y;
+} coordinates;
+
 /** \struct MSG_BOX_TYPE
  *	\brief This structure defines properties of dialog box (selection color, deselection color, background color).
  *	\var MSG_BOX_TYPE::selectColor

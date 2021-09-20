@@ -1,6 +1,4 @@
 #pragma once
-#include <vector>
-
 
 #include "setup.h"
 
@@ -91,6 +89,8 @@ namespace pgi
 		int* FillColorSet(int color, int size);
 
 
+		std::string* MaskDescriptions(std::string descriptions[], int size);
+
 	public:
 		int fontSize = 48;			//!< By default font size is 48, you can change it in constructor while creating an object.
 		int windowWidth = 1920;		//!< By default window width is 1920, you can change it in constructor while creating an object.
@@ -131,13 +131,7 @@ namespace pgi
 	class Line : protected Graphics
 	{
 	public:
-		Line(int X, int Y, int _lineLength, char _lineSegment)
-		{
-			lineStartX = X;
-			lineStartY = Y;
-			lineLength = _lineLength;
-			lineSegment = _lineSegment;
-		};
+		Line(int X, int Y, int _lineLength, char _lineSegment);
 
 		virtual void DrawLine() = 0;
 
@@ -230,66 +224,102 @@ namespace pgi
 
 
 	/** \class Menu
-	 *	\brief This class is used to spawn different kinds of menus (Vertical, Horizontal, checkbox)
+	 *	\brief This is an inteface (abstract) class for all menus
 	 */
 	class Menu : protected Graphics
 	{
 	protected:
-		int X;			//!< Contains menu origin coordiante on X axis.
-		int Y;			//!< Contains menu origin coordiante on Y axis.
 		int size;		//!< Contains amount of menu points (paragraphs).
 		int fontSize;	//!< Font size of menu text.
-		std::vector <PARAGRAPH*> menuObject;					//!< Contains elements of menu.
+		coordinates position;								//!< Structure that contains origin coordinates of a menu
+		PARAGRAPH** menuObject;								//!< Contains elements of menu.
 		Frame descriptionField;								//!< Contains frame where desription of paragraphs will be displayed.
+		std::string* descriptions;
 
 		Menu() = default;
 
-		/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+		/** \fn Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics)
 		 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
 		 *
 		 *	\param _size				Gets integer value size of menu (amount of points).
-		 *	\param _X					Gets integer value of X axis coordinate.
-		 *	\param _Y					Gets integer value of Y axis coordinate.
+		 *	\param _X					Gets integer value of menu origin on X axis coordinate.
+		 *	\param _Y					Gets integer value of menu origin on Y axis coordinate.
 		 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
 		 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 		 *	\param _descriptionField	Contains Frame object where description will be displayed.
 		 */
 		Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
 
+		/** \fn Menu::MenuLoop(int switchKey1, int switchKey2, char conditionKey, int colorSet[])
+		 *	\brief This main logical function of any menu.
+		 *
+		 *	\param switchKey1		Gets integer value of key for moving cursor up or left.
+		 *	\param switchKey2		Gets integer value of key for moving cursor down or right.
+		 *	\param conditionKey		Key that will be flag for starting additional function.
+		 *	\param colorSet[]		Array of integer values from which menu objects will be drawn.
+		 *
+		 *	\return State of menu from enumeration in setup.h.
+		 */
 		int MenuLoop(int switchKey1, int switchKey2, char conditionKey, int colorSet[]);
 
-		/** \fn DrawDescription(std::string text)
+		/** \fn Menu::DrawDescription(std::string text)
 		 *	\brief This method displays description for element of menu. (is inaccessacle from outside the class)
 		 *
 		 *	\param text		Gets string that will be displayed in frame.
 		 */
 		void DrawDescription(std::string text);
 
+
+		/** \fn Menu::DrawMenu(int _ColorSet[])
+		 *	\brief Abstract function for drawing menu.
+		 *
+		 *	\param colorSet[]		Array of integer values from which menu objects will be drawn.
+		 */
 		virtual void DrawMenu(int _ColorSet[]) = 0;
 
-		virtual void Condition(int counter, int colorSet[]) = 0;
+
+		/** \fn Menu::Condition(int counter, int colorSet[])
+		 *	\brief Abstract function that executes additional instructions such as check boxes or submenu.
+		 *	
+		 *	\param counter			Gets integer value of cursor position in menu.
+		 *	\param colorSet[]		Array of integer values from which menu objects will be drawn.
+		 */
+		virtual bool Condition(int counter, int colorSet[]) = 0;
+
+		virtual coordinates CalculatePositionInFrame(int frameWidth, int frameHeight);
+
+		virtual coordinates CalculateWindowCenter(int windowWidth, int windowHeight, std::string objNames[]);
 
 	public:
+
+		/** \fn Menu::SpawnMenu(bool onlyDraw = false)
+		 *	\brief Main abstract function of creating a menu.
+		 *
+		 *	\param onlyDraw		Gets boolean value for drawing menu. If the value would be true menu will only be renderd and if the value would be false menu will work as shoud to be.
+		 *	\return			State of menu from enumeration in setup.h.
+		 */
 		virtual int SpawnMenu(bool onlyDraw = false) = 0;
 	};
 
-
+	/** \class vMenu
+	 *	\brief Class for creating object of a vertical menu.
+	 */
 	class vMenu : public Menu
 	{
 	public:
-		/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+		/** \fn Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics)
 		 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
 		 *
 		 *	\param _size				Gets integer value size of menu (amount of points).
-		 *	\param _X					Gets integer value of X axis coordinate.
-		 *	\param _Y					Gets integer value of Y axis coordinate.
+		 *	\param _X					Gets integer value of menu origin on X axis coordinate.
+		 *	\param _Y					Gets integer value of menu origin on Y axis coordinate.
 		 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
 		 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 		 *	\param _descriptionField	Contains Frame object where description will be displayed.
 		 */
 		vMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
 
-		/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+		/** \fn vMenu::vMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics)
 		 *	\brief This constructor creates menu in center of window.
 		 *
 		 *	\param _size				Gets integer value size of menu (amount of points).
@@ -299,7 +329,7 @@ namespace pgi
 		 */
 		vMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
 
-		/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
+		/** \fn vMenu::vMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics)
 		 *	\brief This constructor creates menu in center of Frame.
 		 *
 		 *	\param _size				Gets integer value size of menu (amount of points).
@@ -310,49 +340,64 @@ namespace pgi
 		 */
 		vMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
 
+		/** \fn vMenu::SpawnMenu(bool onlyDraw = false)
+		 *	\brief Main function of creating a vertical menu.
+		 *
+		 *	\param onlyDraw		Gets boolean value for drawing menu. If the value would be true menu will only be renderd and if the value would be false menu will work as shoud to be.
+		 *	\return			State of menu from enumeration in setup.h.
+		 */
 		int SpawnMenu(bool onlyDraw = false);
 
-
 	protected:
-		virtual void Condition(int counter, int colorSet[]) override {}
+		/** \fn vMenu::Condition(int counter, int colorSet[])
+		 *	\brief Default vertical menu have not got any aditional functionality.
+		 */
+		virtual bool Condition(int counter, int colorSet[]) override { return false; }
 
+		/** \fn vMenu::DrawMenu(int _ColorSet[])
+		 *	\brief Function for drawing vertical menu.
+		 *
+		 *	\param colorSet[]		Array of integer values from which menu objects will be drawn.
+		 */
 		void DrawMenu(int _ColorSet[]) override;
 	};
 
-
+	/** \class hMenu
+	 *	\brief Class for creating object of a horizontal menu.
+	 */
 	class hMenu : public Menu
 	{
 	public:
-		/** \fn Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+		/** \fn Menu::Menu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics)
 		 *	\brief This constructor creates menu in position that user passed in '_X' and '_Y' arguments.
 		 *
 		 *	\param _size				Gets integer value size of menu (amount of points).
-		 *	\param _X					Gets integer value of X axis coordinate.
-		 *	\param _Y					Gets integer value of Y axis coordinate.
+		 *	\param _X					Gets integer value of menu origin on X axis coordinate.
+		 *	\param _Y					Gets integer value of menu origin on Y axis coordinate.
 		 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
-		 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 		 *	\param _descriptionField	Contains Frame object where description will be displayed.
+		 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 		 */
 		hMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
 
-		/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Graphics _Graphics, Frame _descriptionField)
+		/** \fn hMenu::hMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics)
 		 *	\brief This constructor creates menu in center of window.
 		 *
 		 *	\param _size				Gets integer value size of menu (amount of points).
 		 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
-		 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 		 *	\param _descriptionField	Contains Frame object where description will be displayed.
+		 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 		 */
 		hMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics);
 
-		/** \fn Menu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Graphics _Graphics, Frame _descriptionField)
+		/** \fn hMenu::hMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics)
 		 *	\brief This constructor creates menu in center of Frame.
 		 *
 		 *	\param _size				Gets integer value size of menu (amount of points).
 		 *	\param _menuObject[]		Contains PARAGRAPH* objects of menu.
 		 *	\param _Frame				Contains Frame object where menu will be spawned.
-		 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 		 *	\param _descriptionField	Contains Frame object where description will be displayed.
+		 *	\param _Graphics			Contains Graphics object with basic parameters (font size, font colors, window size).
 		 */
 		hMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
 
@@ -365,9 +410,22 @@ namespace pgi
 		int SpawnMenu(bool onlyDraw = false);
 
 	private:
-		void Condition(int counter, int colorSet[]) override {}
 
+		/** \fn vMenu::Condition(int counter, int colorSet[])
+		 *	\brief Default horizontal menu have not got any aditional functionality.
+		 */
+		bool Condition(int counter, int colorSet[]) override {}
+
+		/** \fn vMenu::DrawMenu(int _ColorSet[])
+		 *	\brief Function for drawing horizontal menu.
+		 *
+		 *	\param colorSet[]		Array of integer values from which menu objects will be drawn.
+		 */
 		void DrawMenu(int _ColorSet[]) override;
+
+		coordinates CalculatePositionInFrame(int frameWidth, int frameHeight) override;
+
+		coordinates CalculateWindowCenter(int windowWidth, int windowHeight, std::string objNames[]) override;
 	};
 
 
@@ -408,7 +466,7 @@ namespace pgi
 		cMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics);
 
 		/** \fn cMenu::SpawnMenu()
-		 *	\brief Spawns Vertical menu where user can choose multiple options with properties that was supplied in constructor.
+		 *	\brief Spawns vertical menu where user can choose multiple options with properties that was supplied in constructor.
 		 *
 		 *	\return Massive of objects that was chosen.
 		 */
@@ -417,7 +475,7 @@ namespace pgi
 	private:
 		PARAGRAPH** selectedPoints;
 
-		void Condition(int counter, int colorSet[]) override;
+		bool Condition(int counter, int colorSet[]) override;
 	};
 
 
@@ -470,7 +528,7 @@ namespace pgi
 		int SpawnMenu(Menu* menu1, Menu* menu2);
 
 	private:
-		void Condition(int counter, int colorSet[]) override {}
+		bool Condition(int counter, int colorSet[]) override { return false; }
 	};
 
 
@@ -515,7 +573,7 @@ namespace pgi
 	private:
 		vMenu** paragraphs;
 
-		void Condition(int counter, int colorSet[]) override;
+		bool Condition(int counter, int colorSet[]) override;
 
 		void DrawMenu(int _ColorSet[]);
 
