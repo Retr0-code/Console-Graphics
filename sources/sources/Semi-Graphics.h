@@ -91,6 +91,8 @@ namespace pgi
 
 		std::string* MaskDescriptions(std::string descriptions[], int size);
 
+		bool GetKeyState(KEY_EVENT_RECORD key);
+
 	public:
 		int fontSize = 48;			//!< By default font size is 48, you can change it in constructor while creating an object.
 		int windowWidth = 1920;		//!< By default window width is 1920, you can change it in constructor while creating an object.
@@ -125,6 +127,10 @@ namespace pgi
 		 *	\example DefineWindowsProperties2 Graphics window(1920, 1080, 48);
 		 */
 		Graphics(int resolutionX, int resolutionY, int _fontSize);
+
+		coordinates GetMousePosition();
+
+		int MousePressed();
 	};
 
 
@@ -260,7 +266,7 @@ namespace pgi
 		 *
 		 *	\return State of menu from enumeration in setup.h.
 		 */
-		int MenuLoop(int switchKey1, int switchKey2, char conditionKey, int colorSet[]);
+		int MenuLoop(int switchKey1, int switchKey2, int conditionKey, int colorSet[]);
 
 		/** \fn Menu::DrawDescription(std::string text)
 		 *	\brief This method displays description for element of menu. (is inaccessacle from outside the class)
@@ -414,7 +420,7 @@ namespace pgi
 		/** \fn vMenu::Condition(int counter, int colorSet[])
 		 *	\brief Default horizontal menu have not got any aditional functionality.
 		 */
-		bool Condition(int counter, int colorSet[]) override {}
+		bool Condition(int counter, int colorSet[]) override { return false; }
 
 		/** \fn vMenu::DrawMenu(int _ColorSet[])
 		 *	\brief Function for drawing horizontal menu.

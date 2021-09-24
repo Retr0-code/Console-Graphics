@@ -77,7 +77,6 @@ namespace pgi
 		windowWidth = resolutionX;
 		windowHeight = resolutionY;
 
-
 		SetCursorPosition(0, 0);
 	}
 
@@ -99,6 +98,58 @@ namespace pgi
 		windowHeight = resolutionY;
 
 		SetCursorPosition(0, 0);
+	}
+
+	coordinates Graphics::GetMousePosition()
+	{
+		POINT cursor;
+		GetCursorPos(&cursor);
+		ScreenToClient(GetConsoleWindow(), &cursor);
+
+		return {
+			cursor.x / fontSize * 2,
+			cursor.y / fontSize
+		};
+	}
+
+	int Graphics::MousePressed()
+	{
+		DWORD events;
+		HANDLE consoleInputHandle = GetStdHandle(STD_INPUT_HANDLE);
+		INPUT_RECORD inputRecord;
+		coordinates mousePos;
+
+		SetConsoleMode(consoleInputHandle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
+
+		bool exitLoop = false;
+
+		while (!exitLoop)
+		{
+			ReadConsoleInput(consoleInputHandle, &inputRecord, 1, &events);
+
+			if (inputRecord.EventType == KEY_EVENT)
+			{
+				switch (inputRecord.Event.KeyEvent.wVirtualKeyCode)
+				{
+					case VK_ESCAPE:
+						exitLoop = !exitLoop;
+						break;
+					case VK_SPACE:
+						std::cout << "SPACE\r";
+						break;
+				}
+			}
+
+			else if (inputRecord.EventType == MOUSE_EVENT)
+			{
+				if (inputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+				{
+					coordinates pos = GetMousePosition();
+					SetCursorPosition(pos.X, pos.Y);
+				}
+			}
+		}
+		return true;
 	}
 
 
@@ -168,6 +219,14 @@ namespace pgi
 			}
 		}
 		return descriptions;
+	}
+
+	bool Graphics::GetKeyState(KEY_EVENT_RECORD key)
+	{
+		if (key.bKeyDown)
+			return false;
+		else
+			return true;
 	}
 
 
@@ -350,57 +409,84 @@ namespace pgi
 			menuObject[i] = _menuObject[i];
 	}
 
-	int Menu::MenuLoop(int switchKey1, int switchKey2, char conditionKey, int colorSet[])
+	int Menu::MenuLoop(int switchKey1, int switchKey2, int conditionKey, int colorSet[])
 	{
 		int counter = 1;
-		char key;
 
-		while (true)
+		DWORD events;
+		HANDLE consoleInputHandle = GetStdHandle(STD_INPUT_HANDLE);
+		INPUT_RECORD inputRecord;
+		coordinates mousePos;
+
+		SetConsoleMode(consoleInputHandle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
+
+		bool exitLoop = false;
+
+		colorSet[counter - 1] = secondaryColors;
+
+		DrawMenu(colorSet);
+		DrawDescription(descriptions[counter - 1]);
+		
+		
+		while (!exitLoop)
 		{
 			try
 			{
-				DrawMenu(colorSet);
-				DrawDescription(descriptions[counter - 1]);
 
-				if (key == BACKSPACE)
+				ReadConsoleInput(consoleInputHandle, &inputRecord, 1, &events);
+
+				if (inputRecord.EventType == KEY_EVENT)
 				{
-					colorSet = FillColorSet(defaultColors, size);
-					DrawMenu(colorSet);
-
-					delete[] colorSet;
-					return MENU_EXIT;
-				}
-				else if (key == TAB)
-				{
-					DrawMenu(colorSet);
-
-					colorSet[counter - 1] = defaultColors;
-					delete[] colorSet;
-					return MENU_SWITCH;
-				}
-
-
-				key = _getch();
-
-
-				if (key == switchKey1 && (counter > 1 && counter <= size))
-				{
-					counter--;
-				}
-				else if (key == switchKey2 && (counter >= 0 && counter < size))
-				{
-					counter++;
-				}
-				else if (key == conditionKey)
-				{
-					if (this->Condition(counter, colorSet))
+					if (inputRecord.Event.KeyEvent.wVirtualKeyCode == VK_BACK && GetKeyState(inputRecord.Event.KeyEvent))
 					{
-						return MENU_DONE;
+						exitLoop = !exitLoop;
 					}
-				}
-				else if (key == ENTER)
-				{
-					if (counter)
+
+					else if (inputRecord.Event.KeyEvent.wVirtualKeyCode == VK_TAB && GetKeyState(inputRecord.Event.KeyEvent))
+					{
+						DrawMenu(colorSet);
+
+						colorSet[counter - 1] = defaultColors;
+						delete[] colorSet;
+						return MENU_SWITCH;
+					}
+
+					else if (inputRecord.Event.KeyEvent.wVirtualKeyCode == switchKey1 && (counter > 1 && counter <= size) && GetKeyState(inputRecord.Event.KeyEvent))
+					{
+						counter--;
+						
+						colorSet = FillColorSet(defaultColors, size);
+						if (counter)
+						{
+							colorSet[counter - 1] = secondaryColors;
+						}
+						DrawMenu(colorSet);
+						DrawDescription(descriptions[counter - 1]);
+					}
+
+					else if (inputRecord.Event.KeyEvent.wVirtualKeyCode == switchKey2 && (counter >= 0 && counter < size) && GetKeyState(inputRecord.Event.KeyEvent))
+					{
+						counter++;
+
+						colorSet = FillColorSet(defaultColors, size);
+						if (counter)
+						{
+							colorSet[counter - 1] = secondaryColors;
+						}
+						DrawMenu(colorSet);
+						DrawDescription(descriptions[counter - 1]);
+					}
+
+					else if (inputRecord.Event.KeyEvent.wVirtualKeyCode == conditionKey && GetKeyState(inputRecord.Event.KeyEvent))
+					{
+						if (this->Condition(counter, colorSet))
+							return MENU_DONE;
+
+						DrawMenu(colorSet);
+						DrawDescription(descriptions[counter - 1]);
+					}
+
+					else if (inputRecord.Event.KeyEvent.wVirtualKeyCode == VK_RETURN && GetKeyState(inputRecord.Event.KeyEvent))
 					{
 						delete[] colorSet;
 						SetTextProperties(defaultColors, fontSize);
@@ -409,10 +495,30 @@ namespace pgi
 					}
 				}
 
-				colorSet = FillColorSet(defaultColors, size);
-				if (counter)
+				else if (inputRecord.EventType == MOUSE_EVENT)
 				{
-					colorSet[counter - 1] = secondaryColors;
+					mousePos = GetMousePosition();
+					for (int i = 0; i < size; i++)
+					{
+						if (mousePos.Y + 2 == position.Y + i)
+						{
+							counter = i + 1;
+							colorSet = FillColorSet(defaultColors, size);
+							if (counter)
+							{
+								colorSet[counter - 1] = secondaryColors;
+							}
+							DrawDescription(descriptions[counter - 1]);
+							DrawMenu(colorSet);
+						}
+					}
+					if (inputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+					{
+						delete[] colorSet;
+						SetTextProperties(defaultColors, fontSize);
+						menuObject[counter - 1]->Execute();
+						return MENU_DONE;
+					}
 				}
 			}
 			catch (...)
@@ -421,8 +527,9 @@ namespace pgi
 				continue;
 			}
 		}
+		return MENU_EXIT;
 	}
-
+	
 	void Menu::DrawDescription(std::string text)
 	{
 		SetTextProperties(defaultColors, fontSize);
@@ -522,7 +629,9 @@ namespace pgi
 			return MENU_EXIT;
 		}
 
-		return MenuLoop(ARROW_UP, ARROW_DOWN, '\0', colorSet);
+		Sleep(100);
+
+		return MenuLoop(VK_UP, VK_DOWN, VK_SPACE, colorSet);
 	}
 
 	void vMenu::DrawMenu(int _ColorSet[])
@@ -613,7 +722,9 @@ namespace pgi
 			return MENU_EXIT;
 		}
 
-		return MenuLoop(ARROW_LEFT, ARROW_RIGHT, '\0', colorSet);
+		Sleep(100);
+
+		return MenuLoop(VK_LEFT, VK_RIGHT, VK_SPACE, colorSet);
 	}
 
 	void hMenu::DrawMenu(int _ColorSet[])
@@ -707,7 +818,9 @@ namespace pgi
 			std::cout << ']';
 		}
 
-		MenuLoop(ARROW_UP, ARROW_DOWN, SPACE, colorSet);
+		Sleep(100);
+
+		MenuLoop(VK_UP, VK_DOWN, VK_SPACE, colorSet);
 		return selectedPoints;
 	}
 
@@ -884,7 +997,9 @@ namespace pgi
 			return MENU_EXIT;
 		}
 
-		return MenuLoop(ARROW_UP, ARROW_DOWN, ' ', colorSet);
+		Sleep(100);
+
+		MenuLoop(VK_UP, VK_DOWN, VK_SPACE, colorSet);
 	}
 
 	bool dMenu::Condition(int counter, int colorSet[])

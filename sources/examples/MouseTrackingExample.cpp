@@ -1,12 +1,12 @@
-﻿#include <conio.h>
+#include <conio.h>
 #include <iostream>
 #include <Windows.h>
 
 #include "../sources/Semi-Graphics.h"
 
-#define FONT_SIZE 36
-#define WINDOW_WIDTH 1280
-#define WINDOW_HEIGHT 820
+#define FONT_SIZE 42
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
 
 void A()
 {
@@ -100,10 +100,14 @@ public:
 int main()
 {
 	pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
-	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, {BG_BLACK, FG_WHITE}, {BG_ORANGE, FG_BLACK}, FONT_SIZE);
 
-	pgi::Frame frame(0, 1, (WINDOW_WIDTH / FONT_SIZE) * 2 - 4, WINDOW_HEIGHT / (FONT_SIZE * 2));
-	frame.SpawnFrame("");
+	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE);
+
+	pgi::Frame frame1(0, 1, 10, WINDOW_HEIGHT / FONT_SIZE - 5, { '+', NULL, NULL, NULL, '-', '|', '[', ']' });
+	pgi::Frame frame2(12, 1, WINDOW_WIDTH / (48 / 2) - 4, WINDOW_HEIGHT / FONT_SIZE - 5);
+
+	frame1.SpawnFrame("Menu");
+	frame2.SpawnFrame("Description");
 
 	std::string menuNames[4] = { "1 MENU" , "2 HELP", "3 TEST", "4 EXIT" };
 	std::string menuDescriptions[4] = { "Displays this menu message", "Displays help message     ", "Displays message with test", "Shuts down the program    " };
@@ -119,19 +123,18 @@ int main()
 
 	// ----------- Initialize Menu ----------- //
 
-	pgi::vMenu menu1(4, 10, 13, objects, frame, window);
-	pgi::vMenu menu2(4, objects, frame, window);
+	pgi::vMenu menu(4, objects, frame1, frame2, window);
 
-	pgi::sMenu switch2Menu(4, objects, frame, window);
+	// Creates vertical menu orientation
+	menu.SpawnMenu();
 
-	// Creates two vertical menu orientation
-	switch2Menu.SpawnMenu(&menu1, &menu2);
+	//window.MousePressed();
 
 	// Removing paragraphs objects to escape memory leak
 	delete fstPar, sndPar, trdPar, frtPar, objects;
 	SecureZeroMemory(menuNames, sizeof(menuNames));
 	SecureZeroMemory(menuDescriptions, sizeof(menuNames));
-	
+
 	_getch();
 
 	return 0;

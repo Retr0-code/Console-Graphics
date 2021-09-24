@@ -115,6 +115,7 @@ public:
 
 int main()
 {
+	pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
 	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, { BG_BLACK, FG_WHITE }, { BG_ORANGE, FG_BLACK }, FONT_SIZE);
 
 	pgi::Frame frame(0, 1, (WINDOW_WIDTH / FONT_SIZE) * 2 - 3, WINDOW_HEIGHT / (FONT_SIZE * 2) - 2);

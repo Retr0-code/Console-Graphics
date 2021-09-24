@@ -98,7 +98,7 @@ public:
 
 int main()
 {
-	
+	pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
 	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, {BG_BLACK, FG_WHITE}, {BG_ORANGE, FG_BLACK}, FONT_SIZE);
 
 	//window.makeFrame(0, 0, WINDOW_WIDTH / 10 - calculatePercent((WINDOW_WIDTH / 10), 11), WINDOW_HEIGHT / 10 - calculatePercent(WINDOW_HEIGHT / 10, 80) );
