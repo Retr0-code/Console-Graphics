@@ -99,7 +99,7 @@ namespace pgi
 		int windowHeight = 1080;	//!< By default window height is 1080, you can change it in constructor while creating an object.
 		int defaultColors = BG_BLACK + FG_WHITE;		//!< Default color is white text on black background, you can change it in constructor while creating an object.
 		int secondaryColors = BG_BLUE + FG_BLACK;		//!< Secondary color is black text on blue background, you can change it in constructor while creating an object.
-
+		bool enableMouse = false;
 
 		/** \fn Graphics(int resolutionX, int resolutionY, color _defaultColor, color _secondaryColor, int _fontSize)
 		 *	\brief Public constructor of 'Graphics' class with the biggest amount of options.
@@ -129,8 +129,6 @@ namespace pgi
 		Graphics(int resolutionX, int resolutionY, int _fontSize);
 
 		coordinates GetMousePosition();
-
-		int MousePressed();
 	};
 
 
@@ -241,6 +239,8 @@ namespace pgi
 		PARAGRAPH** menuObject;								//!< Contains elements of menu.
 		Frame descriptionField;								//!< Contains frame where desription of paragraphs will be displayed.
 		std::string* descriptions;
+		bool menuEnableMouse;
+
 
 		Menu() = default;
 
@@ -291,6 +291,9 @@ namespace pgi
 		 *	\param colorSet[]		Array of integer values from which menu objects will be drawn.
 		 */
 		virtual bool Condition(int counter, int colorSet[]) = 0;
+
+
+		virtual int MouseCondition(coordinates _mousePosition) = 0;
 
 		virtual coordinates CalculatePositionInFrame(int frameWidth, int frameHeight);
 
@@ -366,6 +369,8 @@ namespace pgi
 		 *	\param colorSet[]		Array of integer values from which menu objects will be drawn.
 		 */
 		void DrawMenu(int _ColorSet[]) override;
+
+		int MouseCondition(coordinates _mousePosition) override;
 	};
 
 	/** \class hMenu
@@ -421,6 +426,8 @@ namespace pgi
 		 *	\brief Default horizontal menu have not got any aditional functionality.
 		 */
 		bool Condition(int counter, int colorSet[]) override { return false; }
+
+		int MouseCondition(coordinates _mousePosition) override;
 
 		/** \fn vMenu::DrawMenu(int _ColorSet[])
 		 *	\brief Function for drawing horizontal menu.
@@ -578,12 +585,13 @@ namespace pgi
 
 	private:
 		vMenu** paragraphs;
+		std::string space;
 
 		bool Condition(int counter, int colorSet[]) override;
 
-		void DrawMenu(int _ColorSet[]);
+		int MouseCondition(coordinates _mousePosition) override;
 
-		std::string space;
+		void DrawMenu(int _ColorSet[]);
 	};
 
 

@@ -102,6 +102,8 @@ int main()
 	pgi::cls(GetStdHandle(STD_OUTPUT_HANDLE));
 	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE);
 
+	window.enableMouse = true;
+
 	pgi::Frame frame1(0, 12, WINDOW_WIDTH / (48 / 2) + 14, 6, { '+', NULL, NULL, NULL, '-', '|' });
 	pgi::Frame frame2(0, 1, WINDOW_WIDTH / (48 / 2) + 14, 10);
 

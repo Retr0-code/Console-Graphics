@@ -103,6 +103,12 @@ int main()
 
 	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE);
 
+
+
+	window.enableMouse = true;
+
+
+
 	pgi::Frame frame1(0, 1, 10, WINDOW_HEIGHT / FONT_SIZE - 5, { '+', NULL, NULL, NULL, '-', '|', '[', ']' });
 	pgi::Frame frame2(12, 1, WINDOW_WIDTH / (48 / 2) - 4, WINDOW_HEIGHT / FONT_SIZE - 5);
 

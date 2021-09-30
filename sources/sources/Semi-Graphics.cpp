@@ -104,52 +104,11 @@ namespace pgi
 	{
 		POINT cursor;
 		GetCursorPos(&cursor);
-		ScreenToClient(GetConsoleWindow(), &cursor);
-
-		return {
-			cursor.x / fontSize * 2,
-			cursor.y / fontSize
-		};
-	}
-
-	int Graphics::MousePressed()
-	{
-		DWORD events;
-		HANDLE consoleInputHandle = GetStdHandle(STD_INPUT_HANDLE);
-		INPUT_RECORD inputRecord;
-		coordinates mousePos;
-
-		SetConsoleMode(consoleInputHandle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
-
-		bool exitLoop = false;
-
-		while (!exitLoop)
-		{
-			ReadConsoleInput(consoleInputHandle, &inputRecord, 1, &events);
-
-			if (inputRecord.EventType == KEY_EVENT)
-			{
-				switch (inputRecord.Event.KeyEvent.wVirtualKeyCode)
-				{
-					case VK_ESCAPE:
-						exitLoop = !exitLoop;
-						break;
-					case VK_SPACE:
-						std::cout << "SPACE\r";
-						break;
-				}
-			}
-
-			else if (inputRecord.EventType == MOUSE_EVENT)
-			{
-				if (inputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-				{
-					coordinates pos = GetMousePosition();
-					SetCursorPosition(pos.X, pos.Y);
-				}
-			}
-		}
-		return true;
+		if (ScreenToClient(GetConsoleWindow(), &cursor))
+			return {
+			(cursor.x / fontSize * 2) + cursor.x % 2,
+			(cursor.y / fontSize) + cursor.x % 2
+			};
 	}
 
 
@@ -246,7 +205,10 @@ namespace pgi
 		SetCursorPosition(lineStartX, lineStartY);
 
 		for (int i = 0; i < lineLength; i++)
-			std::cout << lineSegment << std::endl;
+		{
+			std::cout << lineSegment;
+			SetCursorPosition(lineStartX, lineStartY + i);
+		}
 	}
 
 	void hLine::DrawLine()
@@ -311,40 +273,23 @@ namespace pgi
 	{
 		SetCursorPosition(originX, originY);
 
-
 		std::cout << segments.leftTopCorner;
-		for (int i = 0; i < Width; i++)
-		{
-			std::cout << segments.Horizontal;
-		}
+		hLine* topLine = new hLine(originX + 1, originY, Width, segments.Horizontal);
+		topLine->DrawLine();
 		std::cout << segments.rightTopCorner;
-		std::cout << std::endl;
 
+		vLine* leftLine = new vLine(originX, originY + 1, Height, segments.Vertical);
+		leftLine->DrawLine();
 
-		for (int i = 1; i < Height; i++)
-		{
-			SetCursorPosition(originX, originY + i);
-			for (int j = 0; j <= Width; j++)
-			{
-				if (j == 0 || j == Width)
-				{
-					std::cout << segments.Vertical;
-				}
-				if (j != Width)
-					std::cout << " ";
-			}
-			std::cout << std::endl;
-		}
+		vLine* rightLine = new vLine(originX + Width + 1, originY + 1, Height, segments.Vertical);
+		rightLine->DrawLine();
 
 		SetCursorPosition(originX, originY + Height);
+
 		std::cout << segments.leftDownCorner;
-
-		for (int i = 0; i < Width; i++)
-		{
-			std::cout << segments.Horizontal;
-		}
+		hLine* bottomLine = new hLine(originX + 1, originY + Height, Width, segments.Horizontal);
+		bottomLine->DrawLine();
 		std::cout << segments.rightDownCorner;
-
 
 		if (frameHeader.length() != NULL)
 		{
@@ -361,6 +306,11 @@ namespace pgi
 				std::cout << segments.leftStop << frameHeader << segments.rightStop;
 			}
 		}
+
+		delete topLine;
+		delete bottomLine;
+		delete leftLine;
+		delete rightLine;
 	}
 
 	int Frame::GetWidth()
@@ -395,6 +345,7 @@ namespace pgi
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
 		descriptionField = _descriptionField;
+		menuEnableMouse = _Graphics.enableMouse;
 
 		descriptions = new std::string[size];
 
@@ -416,7 +367,8 @@ namespace pgi
 		DWORD events;
 		HANDLE consoleInputHandle = GetStdHandle(STD_INPUT_HANDLE);
 		INPUT_RECORD inputRecord;
-		coordinates mousePos;
+		coordinates mousePosition;
+		coordinates mouseOldPosition;
 
 		SetConsoleMode(consoleInputHandle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
 
@@ -427,12 +379,13 @@ namespace pgi
 		DrawMenu(colorSet);
 		DrawDescription(descriptions[counter - 1]);
 		
+		mouseOldPosition = GetMousePosition();
 		
 		while (!exitLoop)
 		{
 			try
 			{
-
+				
 				ReadConsoleInput(consoleInputHandle, &inputRecord, 1, &events);
 
 				if (inputRecord.EventType == KEY_EVENT)
@@ -486,7 +439,7 @@ namespace pgi
 						DrawDescription(descriptions[counter - 1]);
 					}
 
-					else if (inputRecord.Event.KeyEvent.wVirtualKeyCode == VK_RETURN && GetKeyState(inputRecord.Event.KeyEvent))
+					else if ((inputRecord.Event.KeyEvent.wVirtualKeyCode == VK_RETURN && GetKeyState(inputRecord.Event.KeyEvent)) && counter > 0)
 					{
 						delete[] colorSet;
 						SetTextProperties(defaultColors, fontSize);
@@ -495,24 +448,25 @@ namespace pgi
 					}
 				}
 
-				else if (inputRecord.EventType == MOUSE_EVENT)
+				else if (inputRecord.EventType == MOUSE_EVENT && menuEnableMouse)
 				{
-					mousePos = GetMousePosition();
-					for (int i = 0; i < size; i++)
+					mousePosition = GetMousePosition();
+					std::cout << mousePosition.Y << "\r";
+					if (mousePosition.X != mouseOldPosition.X || mousePosition.Y != mouseOldPosition.Y)
 					{
-						if (mousePos.Y + 2 == position.Y + i)
+						mouseOldPosition = mousePosition;
+						counter = this->MouseCondition(mousePosition) + 1;
+
+						colorSet = FillColorSet(defaultColors, size);
+						if (counter > 0)
 						{
-							counter = i + 1;
-							colorSet = FillColorSet(defaultColors, size);
-							if (counter)
-							{
-								colorSet[counter - 1] = secondaryColors;
-							}
-							DrawDescription(descriptions[counter - 1]);
+							colorSet[counter - 1] = secondaryColors;
 							DrawMenu(colorSet);
+							DrawDescription(descriptions[counter - 1]);
 						}
 					}
-					if (inputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+
+					if (inputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED && counter > 0)
 					{
 						delete[] colorSet;
 						SetTextProperties(defaultColors, fontSize);
@@ -555,7 +509,6 @@ namespace pgi
 	}
 
 
-
 	// --------------| Vertical menu |--------------
 
 	vMenu::vMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : Menu(_size, _X, _Y, _menuObject, _descriptionField, _Graphics) {}
@@ -566,6 +519,7 @@ namespace pgi
 
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
+		menuEnableMouse = _Graphics.enableMouse;
 
 		size = _size;
 		descriptionField = _descriptionField;
@@ -583,7 +537,7 @@ namespace pgi
 		for (int i = 0; i < size; i++)
 		{
 			menuObject[i] = _menuObject[i];
-			objNames[i] = _menuObject[0]->paragraphName;
+			objNames[i] = _menuObject[i]->paragraphName;
 		}
 
 		position = CalculateWindowCenter(_Graphics.windowWidth, _Graphics.windowHeight, objNames);
@@ -600,6 +554,7 @@ namespace pgi
 		descriptionField = _descriptionField;
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
+		menuEnableMouse = _Graphics.enableMouse;
 
 		descriptions = new std::string[size];
 
@@ -644,7 +599,15 @@ namespace pgi
 		}
 	}
 
-
+	int vMenu::MouseCondition(coordinates _mousePosition)
+	{
+		for (int i = 0; i < size; i++)
+		{
+			if (_mousePosition.Y + 2 == position.Y + i && _mousePosition.X >= position.X && _mousePosition.X <= position.X + (menuObject[i]->paragraphName).length())
+				return i;
+		}
+		return -1;
+	}
 
 
 	// --------------| Horizontal menu |--------------
@@ -657,6 +620,7 @@ namespace pgi
 
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
+		menuEnableMouse = _Graphics.enableMouse;
 
 		size = _size;
 		descriptionField = _descriptionField;
@@ -690,6 +654,7 @@ namespace pgi
 		descriptionField = _descriptionField;
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
+		menuEnableMouse = _Graphics.enableMouse;
 
 		position = CalculatePositionInFrame(_Frame.GetWidth(), _Frame.GetHeight());
 		position.Y += _Frame.GetOriginY();
@@ -763,11 +728,25 @@ namespace pgi
 		}
 	}
 
+	int hMenu::MouseCondition(coordinates _mousePosition)
+	{
+		for (int i = 0; i < size; i++)
+		{
+			if (_mousePosition.X + size * i == position.X + position.X * i && 
+				_mousePosition.X + size * i >= position.X + position.X * i &&
+				_mousePosition.X + size * i <= position.X + position.X * i + (menuObject[i]->paragraphName).length()
+				)
+				return i;
+		}
+		return -1;
+	}
 
 	// --------------| CheckBox menu |--------------
 
 	cMenu::cMenu(int _size, int _X, int _Y, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _X, _Y, _menuObject, _descriptionField, _Graphics)
 	{
+		menuEnableMouse = _Graphics.enableMouse;
+
 		for (int i = 0; i < size; i++)
 			descriptions[i] = _menuObject[i]->description;
 
@@ -778,6 +757,8 @@ namespace pgi
 
 	cMenu::cMenu(int _size, PARAGRAPH* _menuObject[], Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _menuObject, _descriptionField, _Graphics)
 	{
+		menuEnableMouse = _Graphics.enableMouse;
+
 		descriptions = new std::string[size];
 		for (int i = 0; i < size; i++)
 			descriptions[i] = _menuObject[i]->description;
@@ -789,6 +770,8 @@ namespace pgi
 
 	cMenu::cMenu(int _size, PARAGRAPH* _menuObject[], Frame _Frame, Frame _descriptionField, Graphics _Graphics) : vMenu(_size, _menuObject, _Frame, _descriptionField, _Graphics)
 	{
+		menuEnableMouse = _Graphics.enableMouse;
+
 		descriptions = new std::string[size];
 		for (int i = 0; i < size; i++)
 			descriptions[i] = _menuObject[i]->description;
@@ -894,6 +877,7 @@ namespace pgi
 	{
 		std::string* paragraphNames = new std::string[_size];
 		paragraphs = _paragraphs;
+		menuEnableMouse = _Graphics.enableMouse;
 
 		descriptions = new std::string[size];
 		for (int i = 0; i < size; i++)
@@ -918,6 +902,7 @@ namespace pgi
 		descriptionField = _descriptionField;
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
+		menuEnableMouse = _Graphics.enableMouse;
 
 		paragraphs = _paragraphs;
 
@@ -935,7 +920,7 @@ namespace pgi
 		for (int i = 0; i < size; i++)
 		{
 			menuObject[i] = _menuObject[i];
-			objNames[i] = _menuObject[0]->paragraphName;
+			objNames[i] = _menuObject[i]->paragraphName;
 		}
 
 		position = CalculateWindowCenter(_Graphics.windowWidth, _Graphics.windowHeight, objNames);
@@ -957,6 +942,7 @@ namespace pgi
 		defaultColors = _Graphics.defaultColors;
 		secondaryColors = _Graphics.secondaryColors;
 		position = CalculatePositionInFrame(_Frame.GetWidth(), _Frame.GetHeight());
+		menuEnableMouse = _Graphics.enableMouse;
 
 		paragraphs = _paragraphs;
 
@@ -999,7 +985,7 @@ namespace pgi
 
 		Sleep(100);
 
-		MenuLoop(VK_UP, VK_DOWN, VK_SPACE, colorSet);
+		return MenuLoop(VK_UP, VK_DOWN, VK_SPACE, colorSet);
 	}
 
 	bool dMenu::Condition(int counter, int colorSet[])
@@ -1045,6 +1031,16 @@ namespace pgi
 			DrawMenu(colorSet);
 			return false;
 		}
+	}
+
+	int dMenu::MouseCondition(coordinates _mousePosition)
+	{
+		for (int i = 0; i < size; i++)
+		{
+			if (_mousePosition.Y + 2 == position.Y + i && _mousePosition.X >= position.X && _mousePosition.X <= position.X + (menuObject[i]->paragraphName).length())
+				return i;
+		}
+		return -1;
 	}
 
 	void dMenu::DrawMenu(int _ColorSet[])

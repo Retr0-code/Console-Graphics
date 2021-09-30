@@ -104,11 +104,14 @@ int main()
 
 	pgi::Graphics window(WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE);
 
+	window.enableMouse = true;
+
 	pgi::Frame frame1(0, 1, 12, WINDOW_HEIGHT / FONT_SIZE - 5, { '+', NULL, NULL, NULL, '-', '|', '[', ']' });
 	pgi::Frame frame2(14, 1, WINDOW_WIDTH / (48 / 2) - 6, WINDOW_HEIGHT / FONT_SIZE - 5);
 
 	frame1.SpawnFrame("Menu");
 	frame2.SpawnFrame("Description");
+
 
 	std::string menuNames[4] = { "1 MENU" , "2 HELP", "3 TEST", "4 EXIT" };
 	std::string menuDescriptions[4] = { "Displays this menu message", "Displays help message     ", "Displays message with test", "Shuts down the program    " };
